@@ -12,6 +12,7 @@ fastapi = { extras = ["standard"], version = "^0.115.12" }
 sqlalchemy = "^2.0.40"
 pydantic-settings = "^2.8.1"
 alembic = "^1.15.2"
+psycopg = {extras = ["binary"], version = "^3.2.6"}
 
 
 [tool.poetry.group.dev.dependencies]
