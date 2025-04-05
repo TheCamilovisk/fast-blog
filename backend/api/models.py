@@ -13,7 +13,7 @@ class User:
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     username: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
-    email: Mapped[datetime] = mapped_column(unique=True)
+    email: Mapped[str] = mapped_column(unique=True)
     created_at: Mapped[datetime] = mapped_column(
         init=False, default=func.now()
     )
