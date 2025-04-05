@@ -8,7 +8,7 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
-fastapi = {extras = ["standard"], version = "^0.115.12"}
+fastapi = { extras = ["standard"], version = "^0.115.12" }
 sqlalchemy = "^2.0.40"
 pydantic-settings = "^2.8.1"
 alembic = "^1.15.2"
@@ -32,7 +32,7 @@ extend-include = ['migrations']
 preview = true
 select = ['I', 'F', 'E', 'W', 'PL', 'PT']
 
-[too.ruff.format]
+[tool.ruff.format]
 preview = true
 quote-style = 'single'
 
