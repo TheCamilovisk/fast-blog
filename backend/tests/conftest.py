@@ -3,20 +3,23 @@ from datetime import datetime
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import StaticPool, create_engine, event
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
+from testcontainers.postgres import PostgresContainer
 
 from api.app import app
 from api.models import User, table_registry
 
 
+@pytest.fixture(scope='session')
+def engine():
+    with PostgresContainer('postgres:17', driver='psycopg') as postgres:
+        _engine = create_engine(postgres.get_connection_url())
+        yield _engine
+
+
 @pytest.fixture
-def session():
-    engine = create_engine(
-        'sqlite:///:memory:',
-        connect_args={'check_same_thread': False},
-        poolclass=StaticPool,
-    )
+def session(engine):
     table_registry.metadata.create_all(engine)
 
     with Session(engine) as session:
