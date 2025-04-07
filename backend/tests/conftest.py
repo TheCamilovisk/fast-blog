@@ -73,3 +73,17 @@ def user(session, mock_db_time):
         session.commit()
         session.refresh(user)
         yield user
+
+
+@pytest.fixture
+def another_user(session, mock_db_time):
+    with mock_db_time(model=User):
+        user = User(
+            username='anotheruser',
+            password='anotherpassword',
+            email='anotheruser@example.com',
+        )
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+        yield user
