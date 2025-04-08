@@ -28,10 +28,12 @@ class CredentialsException(RuntimeError):
 
 OAuth2Scheme = Annotated[
     str,
-    OAuth2PasswordBearer(
-        tokenUrl='/auth/token',
-        scheme_name='JWT',
-        description='JWT authentication scheme',
+    Depends(
+        OAuth2PasswordBearer(
+            tokenUrl='/auth/token',
+            scheme_name='JWT',
+            description='JWT authentication scheme',
+        )
     ),
 ]
 
