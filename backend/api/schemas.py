@@ -26,3 +26,8 @@ class UserUpdateSchema(BaseModel):
 class UserSearchSchema(BaseModel):
     username: str | None = None
     email: str | None = None
+
+
+class TokenSchema(BaseModel):
+    access_token: str
+    token_type: str
