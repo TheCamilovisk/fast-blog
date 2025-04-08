@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class MessageSchema(BaseModel):
@@ -16,6 +16,12 @@ class UserPublicSchema(BaseModel):
     username: str
     email: str
 
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserPublicListSchema(BaseModel):
+    users: list[UserPublicSchema]
+
 
 class UserUpdateSchema(BaseModel):
     username: str | None = None
@@ -31,3 +37,13 @@ class UserSearchSchema(BaseModel):
 class TokenSchema(BaseModel):
     access_token: str
     token_type: str
+
+
+class PaginationFilter(BaseModel):
+    offset: int = 0
+    limit: int = 10
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        self.offset = max(self.offset, 0)
+        self.limit = max(self.limit, 1)

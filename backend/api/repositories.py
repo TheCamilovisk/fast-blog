@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 
 from api.database import Session, get_session
 from api.models import User
-from api.schemas import UserSchema, UserUpdateSchema
+from api.schemas import PaginationFilter, UserSchema, UserUpdateSchema
 from api.security import get_password_hash
 
 
@@ -34,10 +34,11 @@ class UserRepository:
     def get_user_by_email(self, email: str) -> User | None:
         return self.session.scalar(select(User).filter(User.email == email))
 
-    def get_users(self, skip: int = 0, limit: int = 100) -> list[User]:
-        return self.session.scalars(
-            select(User).offset(skip).limit(limit)
+    def get_users(self, pagination: PaginationFilter) -> list[User]:
+        result = self.session.scalars(
+            select(User).offset(pagination.offset).limit(pagination.limit)
         ).all()
+        return result
 
     def create_user(self, user_data: UserSchema) -> User:
         db_user = User(
