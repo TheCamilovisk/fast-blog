@@ -10,7 +10,7 @@ from testcontainers.postgres import PostgresContainer
 from api.app import app
 from api.database import get_session
 from api.models import User, table_registry
-from api.security import get_password_hash
+from api.security import create_access_token, get_password_hash
 
 
 @pytest.fixture(scope='session')
@@ -104,3 +104,8 @@ def another_user(session, mock_db_time):
         user.clean_password = password
 
         yield user
+
+
+@pytest.fixture
+def user_token(user):
+    return create_access_token({'sub': user.email, 'exp': 30})
