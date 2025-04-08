@@ -1,11 +1,12 @@
 import pytest
 
+from api import security
 from api.repositories import (
     RepositoryConflictError,
     RepositoryNotFoundError,
     UserRepository,
 )
-from api.schemas import UserSchema, UserSearchSchema, UserUpdateSchema
+from api.schemas import UserSchema, UserUpdateSchema
 
 
 @pytest.fixture
@@ -27,11 +28,23 @@ def test_get_user_by_username_ok(user, user_repository):
     assert result == user
 
 
+def test_get_user_by_username_not_found(user_repository):
+    result = user_repository.get_user_by_username('nonexistentuser')
+
+    assert result is None
+
+
 def test_get_user_by_email_ok(user, user_repository):
     result = user_repository.get_user_by_email(user.email)
 
     assert result is not None
     assert result == user
+
+
+def test_get_user_by_email_not_found(user_repository):
+    result = user_repository.get_user_by_email('nonexistentuser@email.com')
+
+    assert result is None
 
 
 def test_get_users_ok(user, another_user, user_repository):
@@ -40,23 +53,6 @@ def test_get_users_ok(user, another_user, user_repository):
     assert len(result) == 2  # noqa: PLR2004
     assert user in result
     assert another_user in result
-
-
-def test_find_user_ok(user, user_repository):
-    user_data = UserSearchSchema(username=user.username, email=user.email)
-    result = user_repository.find_user(user_data)
-
-    assert result is not None
-    assert result == user
-
-
-def test_find_user_not_found_ok(user_repository):
-    user_data = UserSearchSchema(
-        username='testuser', email='testuser@test.com'
-    )
-    result = user_repository.find_user(user_data)
-
-    assert result is None
 
 
 def test_create_user_ok(user_repository):
@@ -135,6 +131,22 @@ def test_update_user_conflict_email(user, another_user, user_repository):
         user_repository.update_user(2, user_data)
 
     assert str(context.value) == 'Email already exists.'
+
+
+def test_update_user_password_ok(user, user_repository):
+    new_password = 'newsecurepassword'
+    user_data = UserUpdateSchema(password=new_password)
+
+    result = user_repository.update_user(user.id, user_data)
+
+    db_user = user_repository.get_user_by_id(user.id)
+
+    assert result is not None
+    assert result.id == user.id
+    assert result.username == user.username
+    assert result.email == user.email
+    assert result.password != new_password
+    assert security.verify_password(new_password, db_user.password)
 
 
 def test_delete_user_ok(user, user_repository):

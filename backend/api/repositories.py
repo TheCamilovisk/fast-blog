@@ -1,7 +1,11 @@
+from typing import Annotated
+
+import sqlalchemy
+from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
 
+from api.database import Session, get_session
 from api.models import User
 from api.schemas import UserSchema, UserUpdateSchema
 from api.security import get_password_hash
@@ -16,7 +20,7 @@ class RepositoryNotFoundError(Exception):
 
 
 class UserRepository:
-    def __init__(self, session: Session):
+    def __init__(self, session: sqlalchemy.orm.Session):
         self.session = session
 
     def get_user_by_id(self, user_id: int) -> User | None:
@@ -34,14 +38,6 @@ class UserRepository:
         return self.session.scalars(
             select(User).offset(skip).limit(limit)
         ).all()
-
-    def find_user(self, user_data: UserSchema) -> User | None:
-        return self.session.scalar(
-            select(User).filter(
-                User.username == user_data.username,
-                User.email == user_data.email,
-            )
-        )
 
     def create_user(self, user_data: UserSchema) -> User:
         db_user = User(
@@ -99,3 +95,9 @@ class UserRepository:
 
         self.session.delete(db_user)
         self.session.commit()
+
+
+def get_user_repository(
+    session: Annotated[Session, Depends(get_session)],
+) -> UserRepository:
+    return UserRepository(session)
