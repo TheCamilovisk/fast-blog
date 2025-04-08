@@ -1,9 +1,16 @@
 from datetime import datetime, timedelta
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
-from jwt import encode
+from fastapi import Depends
+from fastapi.security import OAuth2PasswordBearer
+from jwt import DecodeError, decode, encode
 from pwdlib import PasswordHash
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
+from api.database import get_session
+from api.models import User
 from api.settings import Settings
 
 settings = Settings()
@@ -13,6 +20,20 @@ ALGORITHM = settings.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 PWD_CONTEXT = PasswordHash.recommended()
+
+
+class CredentialsException(RuntimeError):
+    pass
+
+
+OAuth2Scheme = Annotated[
+    str,
+    OAuth2PasswordBearer(
+        tokenUrl='/auth/token',
+        scheme_name='JWT',
+        description='JWT authentication scheme',
+    ),
+]
 
 
 def create_access_token(data: dict) -> str:
@@ -31,3 +52,28 @@ def get_password_hash(password: str) -> str:
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return PWD_CONTEXT.verify(plain_password, hashed_password)
+
+
+def get_current_user(
+    session: Annotated[Session, Depends(get_session)],
+    token: OAuth2Scheme,
+) -> User:
+    credentials_exception = CredentialsException(
+        'Could not validate credentials'
+    )
+
+    try:
+        payload = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        subject_email = payload.get('sub')
+
+        if not subject_email:
+            raise credentials_exception
+    except DecodeError:
+        raise credentials_exception
+
+    user = session.scalar(select(User).filter(User.email == subject_email))
+
+    if not user:
+        raise credentials_exception
+
+    return user
