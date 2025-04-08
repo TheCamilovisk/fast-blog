@@ -71,7 +71,11 @@ class UserRepository:
             raise RepositoryNotFoundError('User not found.')
 
         for key, value in user_data.model_dump(exclude_unset=True).items():
-            setattr(db_user, key, value)
+            if key == 'password':
+                new_password = get_password_hash(value)
+                setattr(db_user, key, new_password)
+            else:
+                setattr(db_user, key, value)
 
         try:
             self.session.commit()
