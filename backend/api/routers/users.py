@@ -6,7 +6,7 @@ from sqlalchemy import orm, select
 from sqlalchemy.exc import IntegrityError
 
 from api.database import get_session
-from api.models import User
+from api.models.user import User
 from api.schemas import (
     MessageSchema,
     PaginationFilter,

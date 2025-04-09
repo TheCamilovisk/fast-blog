@@ -2,7 +2,7 @@ import pytest
 from jwt import decode
 from sqlalchemy import select
 
-from api.models import User
+from api.models.user import User
 from api.security import (
     ALGORITHM,
     SECRET_KEY,

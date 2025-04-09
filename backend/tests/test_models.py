@@ -3,7 +3,7 @@ from dataclasses import asdict
 import pytest
 from sqlalchemy.exc import IntegrityError
 
-from api.models import User
+from api.models.user import User
 
 
 def test_user_create_ok(session, mock_db_time):

@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 from testcontainers.postgres import PostgresContainer
 
 from api.app import app
-from api.database import get_session
-from api.models import User, table_registry
+from api.database import get_session, table_registry
+from api.models.user import User
 from api.security import create_access_token, get_password_hash
 
 

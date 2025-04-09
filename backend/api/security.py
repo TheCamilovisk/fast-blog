@@ -10,7 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from api.database import get_session
-from api.models import User
+from api.models.user import User
 from api.settings import Settings
 
 settings = Settings()
