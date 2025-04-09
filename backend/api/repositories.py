@@ -34,7 +34,9 @@ class UserRepository:
     def get_user_by_email(self, email: str) -> User | None:
         return self.session.scalar(select(User).filter(User.email == email))
 
-    def get_users(self, pagination: PaginationFilter) -> list[User]:
+    def get_users(
+        self, pagination: PaginationFilter = PaginationFilter()
+    ) -> list[User]:
         result = self.session.scalars(
             select(User).offset(pagination.offset).limit(pagination.limit)
         ).all()
@@ -68,11 +70,7 @@ class UserRepository:
             raise RepositoryNotFoundError('User not found.')
 
         for key, value in user_data.model_dump(exclude_unset=True).items():
-            if key == 'password':
-                new_password = get_password_hash(value)
-                setattr(db_user, key, new_password)
-            else:
-                setattr(db_user, key, value)
+            setattr(db_user, key, value)
 
         try:
             self.session.commit()
@@ -86,6 +84,17 @@ class UserRepository:
 
         else:
             self.session.refresh(db_user)
+
+        return db_user
+
+    def update_password(self, user_id: int, password: str) -> User:
+        db_user = self.get_user_by_id(user_id)
+        if not db_user:
+            raise RepositoryNotFoundError('User not found.')
+
+        db_user.password = get_password_hash(password)
+        self.session.commit()
+        self.session.refresh(db_user)
 
         return db_user
 
