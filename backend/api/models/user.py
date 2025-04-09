@@ -22,6 +22,7 @@ class User:
     updated_at: Mapped[datetime] = mapped_column(
         init=False, default=func.now(), onupdate=func.now()
     )
+    superuser: Mapped[bool] = mapped_column(default=False)
 
     @classmethod
     def list(cls, session, limit: int = 10, offset: int = 0):
@@ -79,6 +80,25 @@ class User:
             return None
 
         user.password = password
+        session.commit()
+        session.refresh(user)
+        return user
+
+    @classmethod
+    def get_by_username_or_email(cls, session, username_or_email: str):
+        return session.scalar(
+            select(cls).filter(
+                (cls.username == username_or_email)
+                | (cls.email == username_or_email)
+            )
+        )
+
+    @classmethod
+    def make_superuser(cls, session, user: User):
+        if user is None:
+            return None
+
+        user.superuser = True
         session.commit()
         session.refresh(user)
         return user

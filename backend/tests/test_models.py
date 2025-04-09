@@ -130,3 +130,40 @@ def test_user_delete_nonexistent_user(session):
     user = User.delete(session, user=user)
 
     assert user is None
+
+
+def test_user_get_by_username_or_email_ok(session, user):
+    found_user = User.get_by_username_or_email(
+        session,
+        username_or_email=user.username,
+    )
+
+    assert found_user is not None
+    assert found_user.id == user.id
+
+
+def test_user_get_by_username_or_email_nonexistent(session):
+    nonexistent_user = User.get_by_username_or_email(
+        session,
+        username_or_email='nonexistentuser',
+    )
+
+    assert nonexistent_user is None
+
+
+def test_make_superuser_ok(session, user):
+    User.make_superuser(session, user=user)
+
+    updated_user = session.query(User).filter_by(id=user.id).first()
+    assert updated_user.superuser is True
+
+
+def test_make_superuser_nonexistent_user(session):
+    nonexistent_user_id = 9999
+    user = session.query(User).filter_by(id=nonexistent_user_id).first()
+
+    assert user is None
+
+    user = User.make_superuser(session, user=user)
+
+    assert user is None
