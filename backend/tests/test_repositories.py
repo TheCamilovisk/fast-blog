@@ -135,9 +135,8 @@ def test_update_user_conflict_email(user, another_user, user_repository):
 
 def test_update_user_password_ok(user, user_repository):
     new_password = 'newsecurepassword'
-    user_data = UserUpdateSchema(password=new_password)
 
-    result = user_repository.update_user(user.id, user_data)
+    result = user_repository.update_password(user.id, new_password)
 
     db_user = user_repository.get_user_by_id(user.id)
 
@@ -147,6 +146,15 @@ def test_update_user_password_ok(user, user_repository):
     assert result.email == user.email
     assert result.password != new_password
     assert security.verify_password(new_password, db_user.password)
+
+
+def test_update_user_password_not_found(user_repository):
+    new_password = 'newsecurepassword'
+
+    with pytest.raises(RepositoryNotFoundError) as context:
+        user_repository.update_password(1, new_password)
+
+    assert str(context.value) == 'User not found.'
 
 
 def test_delete_user_ok(user, user_repository):

@@ -25,7 +25,6 @@ class UserPublicListSchema(BaseModel):
 
 class UserUpdateSchema(BaseModel):
     username: str | None = None
-    password: str | None = None
     email: str | None = None
 
 
