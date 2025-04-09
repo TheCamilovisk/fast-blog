@@ -2,7 +2,7 @@ from http import HTTPStatus
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import orm, select
+from sqlalchemy import orm
 from sqlalchemy.exc import IntegrityError
 
 from api.database import get_session
@@ -35,9 +35,11 @@ async def read_users(
     session: Annotated[Session, Depends(get_session)],
     pagination: UsersPagination,
 ):
-    users = session.scalars(
-        select(User).offset(pagination.offset).limit(pagination.limit)
-    ).all()
+    users = User.list(
+        session,
+        limit=pagination.limit,
+        offset=pagination.offset,
+    )
     return {'users': users}
 
 
@@ -49,7 +51,7 @@ async def read_user(
     session: Annotated[Session, Depends(get_session)],
     current_user: CurrentUser,
 ):
-    user = session.scalar(select(User).filter(User.id == user_id))
+    user = User.get_by_id(session, user_id)
     if user is None:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -71,14 +73,13 @@ async def read_user(
 async def create_user(
     user_data: UserSchema, session: Annotated[Session, Depends(get_session)]
 ):
-    db_user = User(
-        **user_data.model_dump()
-        | {'password': get_password_hash(user_data.password)}
-    )
-
-    session.add(db_user)
     try:
-        session.commit()
+        db_user = User.create(
+            session,
+            username=user_data.username,
+            password=get_password_hash(user_data.password),
+            email=user_data.email,
+        )
     except IntegrityError as e:
         session.rollback()
 
@@ -92,9 +93,6 @@ async def create_user(
                 status_code=HTTPStatus.CONFLICT,
                 detail='Email already exists.',
             )
-
-    else:
-        session.refresh(db_user)
 
     return db_user
 
@@ -108,7 +106,7 @@ async def update_user(
     current_user: CurrentUser,
     session: Annotated[Session, Depends(get_session)],
 ):
-    db_user = session.scalar(select(User).filter(User.id == user_id))
+    db_user = User.get_by_id(session, user_id)
     if db_user is None:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -121,11 +119,13 @@ async def update_user(
             detail='You do not have permission to access this user',
         )
 
-    for key, value in user_data.model_dump(exclude_unset=True).items():
-        setattr(db_user, key, value)
-
     try:
-        session.commit()
+        db_user = User.update(
+            session,
+            user=db_user,
+            username=user_data.username,
+            email=user_data.email,
+        )
     except IntegrityError as e:
         session.rollback()
 
@@ -139,8 +139,6 @@ async def update_user(
                 status_code=HTTPStatus.CONFLICT,
                 detail='Email already exists.',
             )
-    else:
-        session.refresh(db_user)
 
     return db_user
 
@@ -155,7 +153,7 @@ async def delete_user(
     current_user: CurrentUser,
     session: Annotated[Session, Depends(get_session)],
 ):
-    db_user = session.scalar(select(User).filter(User.id == user_id))
+    db_user = User.get_by_id(session, user_id)
     if db_user is None:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -168,7 +166,6 @@ async def delete_user(
             detail='You do not have permission to access this user',
         )
 
-    session.delete(db_user)
-    session.commit()
+    User.delete(session, db_user)
 
     return {'message': 'User deleted successfully'}
