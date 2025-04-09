@@ -20,7 +20,7 @@ from api.security import get_current_user, get_password_hash
 router = APIRouter(prefix='/users', tags=['users'])
 
 
-Session = Annotated[orm.Session, Depends(get_session)]
+DBSession = Annotated[orm.Session, Depends(get_session)]
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
@@ -32,7 +32,7 @@ UsersPagination = Annotated[PaginationFilter, Query()]
 )
 async def read_users(
     current_user: CurrentUser,
-    session: Annotated[Session, Depends(get_session)],
+    session: DBSession,
     pagination: UsersPagination,
 ):
     users = User.list(
@@ -48,7 +48,7 @@ async def read_users(
 )
 async def read_user(
     user_id: int,
-    session: Annotated[Session, Depends(get_session)],
+    session: DBSession,
     current_user: CurrentUser,
 ):
     user = User.get_by_id(session, user_id)
@@ -70,9 +70,7 @@ async def read_user(
 @router.post(
     '/', status_code=HTTPStatus.CREATED, response_model=UserPublicSchema
 )
-async def create_user(
-    user_data: UserSchema, session: Annotated[Session, Depends(get_session)]
-):
+async def create_user(user_data: UserSchema, session: DBSession):
     try:
         db_user = User.create(
             session,
@@ -104,7 +102,7 @@ async def update_user(
     user_id: int,
     user_data: UserUpdateSchema,
     current_user: CurrentUser,
-    session: Annotated[Session, Depends(get_session)],
+    session: DBSession,
 ):
     db_user = User.get_by_id(session, user_id)
     if db_user is None:
@@ -151,7 +149,7 @@ async def update_user(
 async def delete_user(
     user_id: int,
     current_user: CurrentUser,
-    session: Annotated[Session, Depends(get_session)],
+    session: DBSession,
 ):
     db_user = User.get_by_id(session, user_id)
     if db_user is None:
