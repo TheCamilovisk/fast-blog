@@ -10,6 +10,7 @@ from testcontainers.postgres import PostgresContainer
 from api.app import app
 from api.database import get_session, table_registry
 from api.models.profile import Profile
+from api.models.tag import Tag
 from api.models.user import User
 from api.security import create_access_token, get_password_hash
 
@@ -125,3 +126,14 @@ def another_user(session, mock_db_time):
 @pytest.fixture
 def user_token(user):
     return create_access_token({'sub': user.email, 'exp': 30})
+
+
+@pytest.fixture
+def tag(session, mock_db_time):
+    with mock_db_time(model=Profile):
+        tag = Tag(name='TestTag')
+        session.add(tag)
+        session.commit()
+        session.refresh(tag)
+
+        yield tag
