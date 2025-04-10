@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
+from http import HTTPStatus
 from typing import Annotated
 from zoneinfo import ZoneInfo
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jwt import DecodeError, decode, encode
 from pwdlib import PasswordHash
@@ -60,8 +61,9 @@ def get_current_user(
     session: Annotated[Session, Depends(get_session)],
     token: OAuth2Scheme,
 ) -> User:
-    credentials_exception = CredentialsException(
-        'Could not validate credentials'
+    credentials_exception = HTTPException(
+        status_code=HTTPStatus.UNAUTHORIZED,
+        detail='Could not validate credentials',
     )
 
     try:
