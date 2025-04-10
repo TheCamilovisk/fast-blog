@@ -1,4 +1,7 @@
+from http import HTTPStatus
+
 import pytest
+from fastapi import HTTPException
 from jwt import decode
 from sqlalchemy import select
 
@@ -6,7 +9,6 @@ from api.models.user import User
 from api.security import (
     ALGORITHM,
     SECRET_KEY,
-    CredentialsException,
     create_access_token,
     get_current_user,
     get_password_hash,
@@ -50,9 +52,10 @@ def test_get_current_user_ok(session, user, user_token):
 
 
 def test_get_current_user_invalid_token(session, user):
-    with pytest.raises(CredentialsException) as exc_info:
+    with pytest.raises(HTTPException) as exc_info:
         get_current_user(session=session, token='invalidtoken')
 
+    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED
     assert 'could not validate credentials' in str(exc_info.value).lower()
 
 
@@ -62,7 +65,8 @@ def test_get_current_user_user_not_found(session, user, user_token):
     session.delete(db_user)
     session.commit()
 
-    with pytest.raises(CredentialsException) as exc_info:
+    with pytest.raises(HTTPException) as exc_info:
         get_current_user(session=session, token=user_token)
 
+    assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED
     assert 'could not validate credentials' in str(exc_info.value).lower()
