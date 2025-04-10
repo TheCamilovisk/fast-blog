@@ -3,9 +3,10 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-import api.models.profile  # noqa: F401
-import api.models.user  # noqa: F401
 from api.database import table_registry
+from api.models.profile import Profile  # noqa: F401
+from api.models.tag import Tag  # noqa: F401
+from api.models.user import User  # noqa: F401
 from api.settings import Settings
 
 # this is the Alembic Config object, which provides
@@ -42,12 +43,12 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option('sqlalchemy.url')
+    url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
-        dialect_opts={'paramstyle': 'named'},
+        dialect_opts={"paramstyle": "named"},
     )
 
     with context.begin_transaction():
@@ -63,7 +64,7 @@ def run_migrations_online() -> None:
     """
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
-        prefix='sqlalchemy.',
+        prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
 
