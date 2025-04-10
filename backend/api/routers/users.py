@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 
 from api.database import get_session
 from api.models.user import User
+from api.repositories.user_repository import UserRepository
 from api.schemas import (
     MessageSchema,
     PaginationFilter,
@@ -35,7 +36,7 @@ async def read_users(
     session: DBSession,
     pagination: UsersPagination,
 ):
-    users = User.list(
+    users = UserRepository.list(
         session,
         limit=pagination.limit,
         offset=pagination.offset,
@@ -51,7 +52,7 @@ async def read_user(
     session: DBSession,
     current_user: CurrentUser,
 ):
-    user = User.get_by_id(session, user_id)
+    user = UserRepository.get_by_id(session, user_id)
     if user is None:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -72,7 +73,7 @@ async def read_user(
 )
 async def create_user(user_data: UserSchema, session: DBSession):
     try:
-        db_user = User.create(
+        db_user = UserRepository.create(
             session,
             username=user_data.username,
             password=get_password_hash(user_data.password),
@@ -104,7 +105,7 @@ async def update_user(
     current_user: CurrentUser,
     session: DBSession,
 ):
-    db_user = User.get_by_id(session, user_id)
+    db_user = UserRepository.get_by_id(session, user_id)
     if db_user is None:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -118,9 +119,9 @@ async def update_user(
         )
 
     try:
-        db_user = User.update(
+        db_user = UserRepository.update(
             session,
-            user=db_user,
+            obj=db_user,
             username=user_data.username,
             email=user_data.email,
         )
@@ -151,7 +152,7 @@ async def delete_user(
     current_user: CurrentUser,
     session: DBSession,
 ):
-    db_user = User.get_by_id(session, user_id)
+    db_user = UserRepository.get_by_id(session, user_id)
     if db_user is None:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -164,6 +165,6 @@ async def delete_user(
             detail='You do not have permission to access this user',
         )
 
-    User.delete(session, db_user)
+    UserRepository.delete(session, db_user)
 
     return {'message': 'User deleted successfully'}

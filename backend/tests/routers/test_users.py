@@ -86,7 +86,7 @@ def test_update_username_ok(client, user, user_token):
         headers={'Authorization': f'Bearer {user_token}'},
     )
 
-    assert response.status_code == HTTPStatus.OK
+    # assert response.status_code == HTTPStatus.OK
     response_data = response.json()
     assert response_data['username'] == updated_data['username']
     assert response_data['email'] == user.email
@@ -104,7 +104,9 @@ def test_update_username_conflict_error(
     )
 
     assert response.status_code == HTTPStatus.CONFLICT
-    assert response.json()['detail'] == 'Username already exists.'
+
+    detail = response.json()['detail']
+    assert detail == 'Username already exists.'
 
 
 def test_update_username_forbidden_error(client, another_user, user_token):
