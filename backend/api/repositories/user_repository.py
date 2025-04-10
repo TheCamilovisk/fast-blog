@@ -10,9 +10,13 @@ class UserRepository(BaseRepository[User]):
     model = User
 
     @classmethod
-    def get_by_username(cls, session: Session, username: str) -> User | None:
-        return session.scalar(select(User).filter(User == username))
+    def find_by_username(cls, session: Session, username: str) -> User | None:
+        return session.scalar(
+            select(User).filter(User.username.ilike(f'%{username}%'))
+        )
 
     @classmethod
-    def get_by_email(cls, session: Session, email: str) -> User | None:
-        return session.scalar(select(User).filter(User.email == email))
+    def find_by_email(cls, session: Session, email: str) -> User | None:
+        return session.scalar(
+            select(User).filter(User.email.ilike(f'%{email}%'))
+        )
