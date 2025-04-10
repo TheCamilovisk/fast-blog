@@ -9,6 +9,7 @@ from testcontainers.postgres import PostgresContainer
 
 from api.app import app
 from api.database import get_session, table_registry
+from api.models.profile import Profile
 from api.models.user import User
 from api.security import create_access_token, get_password_hash
 
@@ -86,6 +87,21 @@ def user(session, mock_db_time):
         user.clean_password = password
 
         yield user
+
+
+@pytest.fixture
+def profile(session, user, mock_db_time):
+    with mock_db_time(model=Profile):
+        profile = Profile(
+            bio='This is a test bio',
+            website='https://example.com',
+            user_id=user.id,
+        )
+        session.add(profile)
+        session.commit()
+        session.refresh(profile)
+
+        yield profile
 
 
 @pytest.fixture
