@@ -19,16 +19,7 @@ class UserPublicSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class UserPublicListSchema(BaseModel):
-    users: list[UserPublicSchema]
-
-
 class UserUpdateSchema(BaseModel):
-    username: str | None = None
-    email: str | None = None
-
-
-class UserSearchSchema(BaseModel):
     username: str | None = None
     email: str | None = None
 
@@ -63,5 +54,18 @@ class TagsSearchResultSchema(BaseModel):
     search_params: SearchPatternSchema
     total_items: int
     tags: list[TagPublicSchema]
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserSearchSchema(PaginationFilter):
+    username: str | None = None
+    email: str | None = None
+
+
+class UsersSearchResultSchema(BaseModel):
+    search_params: UserSearchSchema
+    total_items: int
+    users: list[UserPublicSchema]
 
     model_config = ConfigDict(from_attributes=True)

@@ -10,13 +10,20 @@ class UserRepository(BaseRepository[User]):
     model = User
 
     @classmethod
-    def find_by_username(cls, session: Session, username: str) -> User | None:
-        return session.scalar(
-            select(User).filter(User.username.ilike(f'%{username}%'))
-        )
+    def list(
+        cls,
+        session: Session,
+        username: str | None = None,
+        email: str | None = None,
+        limit: int = 10,
+        offset: int = 0,
+    ) -> list[User]:
+        query = select(cls.model)
 
-    @classmethod
-    def find_by_email(cls, session: Session, email: str) -> User | None:
-        return session.scalar(
-            select(User).filter(User.email.ilike(f'%{email}%'))
-        )
+        if username:
+            query = query.filter(cls.model.username.ilike(f'%{username}%'))
+
+        if email:
+            query = query.filter(cls.model.email.ilike(f'%{email}%'))
+
+        return session.scalars(query.offset(offset).limit(limit)).all()

@@ -10,10 +10,10 @@ from api.models.user import User
 from api.repositories.user_repository import UserRepository
 from api.schemas import (
     MessageSchema,
-    PaginationFilter,
-    UserPublicListSchema,
     UserPublicSchema,
     UserSchema,
+    UserSearchSchema,
+    UsersSearchResultSchema,
     UserUpdateSchema,
 )
 from api.security import get_current_user, get_password_hash
@@ -25,23 +25,29 @@ DBSession = Annotated[orm.Session, Depends(get_session)]
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
-UsersPagination = Annotated[PaginationFilter, Query()]
+SearchParams = Annotated[UserSearchSchema, Query()]
 
 
 @router.get(
-    '/', status_code=HTTPStatus.OK, response_model=UserPublicListSchema
+    '/', status_code=HTTPStatus.OK, response_model=UsersSearchResultSchema
 )
 async def read_users(
     current_user: CurrentUser,
     session: DBSession,
-    pagination: UsersPagination,
+    pagination: SearchParams,
 ):
     users = UserRepository.list(
         session,
+        username=pagination.username,
+        email=pagination.email,
         limit=pagination.limit,
         offset=pagination.offset,
     )
-    return {'users': users}
+    return {
+        'search_params': pagination,
+        'total_items': len(users),
+        'users': users,
+    }
 
 
 @router.get(
