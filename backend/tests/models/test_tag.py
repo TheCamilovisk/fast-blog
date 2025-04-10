@@ -22,6 +22,7 @@ def test_tag_create_ok(session, mock_db_time):
         'name': 'TestTag',
         'created_at': time,
         'updated_at': time,
+        'posts': [],
     }
 
 

@@ -28,6 +28,7 @@ def test_profile_create_ok(session, user, mock_db_time):
         'created_at': time,
         'updated_at': time,
         'user_id': user.id,
+        'posts': [],
     }
 
 

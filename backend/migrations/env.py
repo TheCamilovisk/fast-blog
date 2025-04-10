@@ -4,6 +4,8 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from api.database import table_registry
+from api.models.post import Post  # noqa: F401
+from api.models.posts_tags import posts_tags  # noqa: F401
 from api.models.profile import Profile  # noqa: F401
 from api.models.tag import Tag  # noqa: F401
 from api.models.user import User  # noqa: F401

@@ -9,6 +9,7 @@ from testcontainers.postgres import PostgresContainer
 
 from api.app import app
 from api.database import get_session, table_registry
+from api.models.post import Post
 from api.models.profile import Profile
 from api.models.tag import Tag
 from api.models.user import User
@@ -51,6 +52,8 @@ def _mock_db_time(*, model, time=datetime(2025, 4, 5, 12, 0, 0)):
             target.created_at = time
         if hasattr(target, 'updated_at'):
             target.updated_at = time
+        if hasattr(target, 'published_at'):
+            target.published_at = time
 
     event.listen(
         model,
@@ -137,3 +140,20 @@ def tag(session, mock_db_time):
         session.refresh(tag)
 
         yield tag
+
+
+@pytest.fixture
+def post(session, profile, mock_db_time):
+    with mock_db_time(model=Profile):
+        post = Post(
+            title='Test Post',
+            subtitle='Test Subtitle',
+            slug='test-post',
+            content='This is the content of the test post.',
+            author_id=profile.id,
+        )
+        session.add(post)
+        session.commit()
+        session.refresh(post)
+
+        yield post

@@ -6,6 +6,7 @@ from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from api.database import table_registry
+from api.models.post import Post
 
 
 @table_registry.mapped_as_dataclass
@@ -27,3 +28,12 @@ class Profile:
     )
 
     user = relationship('User', back_populates='profile')
+
+    posts: Mapped[list[Post]] = relationship(
+        'Post',
+        init=False,
+        back_populates='author',
+        uselist=True,
+        cascade='all, delete-orphan',
+        lazy='selectin',
+    )
