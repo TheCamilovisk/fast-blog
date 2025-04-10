@@ -13,8 +13,8 @@ class Profile:
     __tablename__ = 'profiles'
 
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
-    bio = mapped_column(Text, nullable=True)
-    website = mapped_column(String(255), nullable=True)
+    bio: Mapped[str] = mapped_column(Text, nullable=True)
+    website: Mapped[str] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, init=False, default=func.now()
     )
@@ -22,7 +22,7 @@ class Profile:
         DateTime, init=False, default=func.now(), onupdate=func.now()
     )
 
-    user_id = mapped_column(
+    user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey('users.id'), unique=True, nullable=False
     )
 
