@@ -46,3 +46,22 @@ class PaginationFilter(BaseModel):
         super().__init__(**data)
         self.offset = max(self.offset, 0)
         self.limit = max(self.limit, 1)
+
+
+class TagPublicSchema(BaseModel):
+    id: int
+    name: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class SearchPatternSchema(PaginationFilter):
+    pattern: str | None = None
+
+
+class TagsSearchResultSchema(BaseModel):
+    search_params: SearchPatternSchema
+    total_items: int
+    tags: list[TagPublicSchema]
+
+    model_config = ConfigDict(from_attributes=True)
