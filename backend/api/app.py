@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 from fastapi import FastAPI
 
-from api.routers import auth, tags, users
+from api.routers import auth, authors, tags, users
 from api.schemas import MessageSchema
 
 app = FastAPI()
@@ -16,3 +16,4 @@ def get_root():
 app.include_router(users.router)
 app.include_router(auth.router)
 app.include_router(tags.router)
+app.include_router(authors.router)

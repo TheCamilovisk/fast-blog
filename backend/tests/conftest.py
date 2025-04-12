@@ -99,6 +99,8 @@ def profile(session, user, mock_db_time):
         profile = Profile(
             bio='This is a test bio',
             website='https://example.com',
+            firstname='John',
+            lastname='Doe',
             user_id=user.id,
         )
         session.add(profile)
@@ -124,6 +126,23 @@ def another_user(session, mock_db_time):
         user.clean_password = password
 
         yield user
+
+
+@pytest.fixture
+def another_profile(session, another_user, mock_db_time):
+    with mock_db_time(model=Profile):
+        profile = Profile(
+            bio='This is another test bio',
+            website='https://anotherexample.com',
+            firstname='Jane',
+            lastname='Smith',
+            user_id=another_user.id,
+        )
+        session.add(profile)
+        session.commit()
+        session.refresh(profile)
+
+        yield profile
 
 
 @pytest.fixture

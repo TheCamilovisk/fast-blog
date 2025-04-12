@@ -69,3 +69,47 @@ class UsersSearchResultSchema(BaseModel):
     users: list[UserPublicSchema]
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class AuthorsSearchSchema(PaginationFilter):
+    username: str | None = None
+    firstname: str | None = None
+    lastname: str | None = None
+
+
+class AuthorListSchema(BaseModel):
+    id: int
+    username: str
+    firstname: str
+    lastname: str
+    author_url: str
+
+
+class AuthorsSearchResultSchema(BaseModel):
+    search_params: AuthorsSearchSchema
+    total_items: int
+    authors: list[AuthorListSchema]
+
+
+class AuthorPublicSchema(BaseModel):
+    id: int
+    username: str
+    firstname: str
+    lastname: str
+    email: str
+    bio: str | None = None
+    website: str | None = None
+
+
+class AuthorCreateSchema(BaseModel):
+    firstname: str
+    lastname: str
+    bio: str | None = None
+    website: str | None = None
+
+
+class AuthorUpdateSchema(BaseModel):
+    firstname: str | None = None
+    lastname: str | None = None
+    bio: str | None = None
+    website: str | None = None
