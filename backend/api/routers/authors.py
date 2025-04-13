@@ -42,7 +42,7 @@ def read_authors(session: DBSession, query_params: AuthorsQuery):
 
     authors = [
         {
-            'id': profile.id,
+            'id': profile.user.id,
             'username': profile.user.username,
             'firstname': profile.firstname,
             'lastname': profile.lastname,
@@ -70,7 +70,7 @@ def read_author(
     user_id: int,
     current_user: CurrentUser,
 ):
-    profile = ProfileRepository.get_by_id(session, user_id)
+    profile = ProfileRepository.get_by_user_id(session, user_id)
     if not profile:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -133,6 +133,7 @@ def crete_author(
 
     author = {
         'id': profile.id,
+        'user_id': profile.user.id,
         'username': profile.user.username,
         'firstname': profile.firstname,
         'lastname': profile.lastname,
@@ -145,17 +146,17 @@ def crete_author(
 
 
 @router.put(
-    '/{author_id}',
+    '/{user_id}',
     status_code=HTTPStatus.OK,
     response_model=AuthorPublicSchema,
 )
 def update_author(
     session: DBSession,
-    author_id: int,
+    user_id: int,
     author_data: AuthorUpdateSchema,
     current_user: CurrentUser,
 ):
-    db_profile = ProfileRepository.get_by_id(session, author_id)
+    db_profile = ProfileRepository.get_by_user_id(session, user_id)
     if not db_profile:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -187,6 +188,7 @@ def update_author(
 
     return {
         'id': db_profile.id,
+        'user_id': db_profile.user.id,
         'username': db_profile.user.username,
         'firstname': db_profile.firstname,
         'lastname': db_profile.lastname,
@@ -197,16 +199,16 @@ def update_author(
 
 
 @router.delete(
-    '/{profile_id}',
+    '/{author_id}',
     status_code=HTTPStatus.OK,
     response_model=MessageSchema,
 )
 def delete_author(
     session: DBSession,
-    profile_id: int,
+    author_id: int,
     current_user: CurrentUser,
 ):
-    db_profile = ProfileRepository.get_by_id(session, profile_id)
+    db_profile = ProfileRepository.get_by_id(session, author_id)
     if not db_profile:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,

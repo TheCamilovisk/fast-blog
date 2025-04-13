@@ -42,7 +42,7 @@ def test_read_author_not_found(client, user_token):
 
 def test_read_author_forbidden(client, user_token, another_profile):
     response = client.get(
-        f'/authors/{another_profile.id}',
+        f'/authors/{another_profile.user.id}',
         headers={'Authorization': f'Bearer {user_token}'},
     )
 

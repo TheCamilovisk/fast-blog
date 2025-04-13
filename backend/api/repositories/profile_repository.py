@@ -28,3 +28,8 @@ class ProfileRepository(BaseRepository[Profile]):
 
         query = query.limit(limit).offset(offset)
         return session.scalars(query).all()
+
+    @classmethod
+    def get_by_user_id(cls, session, user_id: int) -> Profile | None:
+        query = select(cls.model).where(cls.model.user_id == user_id)
+        return session.scalar(query)

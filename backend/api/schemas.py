@@ -93,6 +93,7 @@ class AuthorsSearchResultSchema(BaseModel):
 
 class AuthorPublicSchema(BaseModel):
     id: int
+    user_id: int
     username: str
     firstname: str
     lastname: str
