@@ -14,7 +14,7 @@ class BaseRepository(Generic[T]):
         return session.scalar(select(cls.model).filter(cls.model.id == obj_id))
 
     @classmethod
-    def list(
+    def list_all(
         cls, session: Session, limit: int = 10, offset: int = 0
     ) -> list[T]:
         return session.scalars(

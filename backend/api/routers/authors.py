@@ -31,7 +31,7 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
     '/', status_code=HTTPStatus.OK, response_model=AuthorsSearchResultSchema
 )
 def read_authors(session: DBSession, query_params: AuthorsQuery):
-    profiles = ProfileRepository.list(
+    profiles = ProfileRepository.list_all(
         session,
         username=query_params.username,
         firstname=query_params.firstname,

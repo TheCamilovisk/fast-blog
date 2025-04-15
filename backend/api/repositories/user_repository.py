@@ -10,7 +10,7 @@ class UserRepository(BaseRepository[User]):
     model = User
 
     @classmethod
-    def list(
+    def list_all(
         cls,
         session: Session,
         username: str | None = None,

@@ -36,7 +36,7 @@ async def read_users(
     session: DBSession,
     pagination: SearchParams,
 ):
-    users = UserRepository.list(
+    users = UserRepository.list_all(
         session,
         username=pagination.username,
         email=pagination.email,

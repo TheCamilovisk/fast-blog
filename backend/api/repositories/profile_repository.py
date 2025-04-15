@@ -8,7 +8,7 @@ class ProfileRepository(BaseRepository[Profile]):
     model = Profile
 
     @classmethod
-    def list(  # noqa: PLR0913, PLR0917
+    def list_all(  # noqa: PLR0913, PLR0917
         cls,
         session,
         firstname: str | None = None,
