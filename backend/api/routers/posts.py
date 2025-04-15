@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from api.database import get_session
+from api.models.post import Post
 from api.models.profile import Profile
 from api.models.user import User
 from api.repositories.post_repository import PostRespository
@@ -46,6 +47,22 @@ def get_tags(tags_str: str) -> list[str]:
     return tags
 
 
+def parse_post(post: Post) -> PostPublicSchema:
+    return PostPublicSchema(
+        id=post.id,
+        title=post.title,
+        subtitle=post.subtitle,
+        slug=post.slug,
+        content=post.content,
+        is_published=post.is_published,
+        created_at=post.created_at,
+        updated_at=post.updated_at,
+        published_at=post.published_at,
+        author_username=post.author.user.username,
+        tags=post.tags,
+    )
+
+
 DBSession = Annotated[Session, Depends(get_session)]
 
 CurrentAuthor = Annotated[Profile, Depends(get_current_user_profile)]
@@ -74,19 +91,8 @@ async def create_post(
             status_code=HTTPStatus.CONFLICT,
             detail=str(e.orig.args[0]),
         )
-    return {
-        'id': post.id,
-        'title': post.title,
-        'subtitle': post.subtitle,
-        'slug': post.slug,
-        'content': post.content,
-        'is_published': post.is_published,
-        'created_at': post.created_at,
-        'updated_at': post.updated_at,
-        'published_at': post.published_at,
-        'author_username': post.author.user.username,
-        'tags': post.tags,
-    }
+
+    return parse_post(post)
 
 
 @router.get(
@@ -145,19 +151,7 @@ async def get_post(post_id: int, session: DBSession):
             detail='Post not found',
         )
 
-    return {
-        'id': post.id,
-        'title': post.title,
-        'subtitle': post.subtitle,
-        'slug': post.slug,
-        'content': post.content,
-        'is_published': post.is_published,
-        'created_at': post.created_at,
-        'updated_at': post.updated_at,
-        'published_at': post.published_at,
-        'author_username': post.author.user.username,
-        'tags': post.tags,
-    }
+    return parse_post(post)
 
 
 @router.put(
@@ -190,19 +184,7 @@ async def update_post(
         content=post_data.content,
     )
 
-    return {
-        'id': post.id,
-        'title': post.title,
-        'subtitle': post.subtitle,
-        'slug': post.slug,
-        'content': post.content,
-        'is_published': post.is_published,
-        'created_at': post.created_at,
-        'updated_at': post.updated_at,
-        'published_at': post.published_at,
-        'author_username': post.author.user.username,
-        'tags': post.tags,
-    }
+    return parse_post(post)
 
 
 @router.delete(
@@ -265,19 +247,7 @@ async def publish_post(
             detail='Failed to publish post',
         )
 
-    return {
-        'id': post.id,
-        'title': post.title,
-        'subtitle': post.subtitle,
-        'slug': post.slug,
-        'content': post.content,
-        'is_published': post.is_published,
-        'created_at': post.created_at,
-        'updated_at': post.updated_at,
-        'published_at': post.published_at,
-        'author_username': post.author.user.username,
-        'tags': post.tags,
-    }
+    return parse_post(post)
 
 
 @router.post(
@@ -347,16 +317,4 @@ async def add_tags_to_post(
     )
     PostRespository.add_tags(session, post, extracted_tags)
 
-    return {
-        'id': post.id,
-        'title': post.title,
-        'subtitle': post.subtitle,
-        'slug': post.slug,
-        'content': post.content,
-        'is_published': post.is_published,
-        'created_at': post.created_at,
-        'updated_at': post.updated_at,
-        'published_at': post.published_at,
-        'author_username': post.author.user.username,
-        'tags': post.tags,
-    }
+    return parse_post(post)
