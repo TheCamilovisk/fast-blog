@@ -11,7 +11,7 @@ from api.repositories.base_repository import BaseRepository
 
 
 def slugify(title: str) -> str:
-    return title.replace(' ', '-').lower() + '_' + uuid4().hex[:8]
+    return title.replace(' ', '-').lower() + '-' + uuid4().hex[:8]
 
 
 class PostRespository(BaseRepository[Post]):
@@ -44,7 +44,7 @@ class PostRespository(BaseRepository[Post]):
             )
 
         if tags:
-            query = query.filter(cls.model.tags.any(name=tags))
+            query = query.join(Post.tags).filter(Tag.name.in_(tags))
 
         if author_username:
             query = query.filter(

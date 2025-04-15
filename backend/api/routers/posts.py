@@ -42,11 +42,6 @@ def get_current_user_profile(
     return profile
 
 
-def get_tags(tags_str: str) -> list[str]:
-    tags = [tag.strip() for tag in tags_str.split(',')]
-    return tags
-
-
 def parse_post(post: Post) -> PostPublicSchema:
     return PostPublicSchema(
         id=post.id,
@@ -59,7 +54,7 @@ def parse_post(post: Post) -> PostPublicSchema:
         updated_at=post.updated_at,
         published_at=post.published_at,
         author_username=post.author.user.username,
-        tags=post.tags,
+        tags=[tag.name for tag in post.tags],
     )
 
 
@@ -102,10 +97,15 @@ async def get_posts(
     session: DBSession,
     posts_filter: PostsFilter,
 ):
+    tags = (
+        [tag.strip() for tag in posts_filter.tags.split(',')]
+        if posts_filter.tags
+        else []
+    )
     posts = PostRespository.list_all(
         session,
         title=posts_filter.title,
-        tags=posts_filter.tags,
+        tags=tags,
         author_username=posts_filter.author_username,
         published_only=posts_filter.is_published,
         published_at=posts_filter.published_at,
@@ -313,7 +313,7 @@ async def add_tags_to_post(
         )
 
     extracted_tags = TagRepository.find_or_create_multiple(
-        session, tags=get_tags(tags.tags)
+        session, tags=tags.tags
     )
     PostRespository.add_tags(session, post, extracted_tags)
 

@@ -42,7 +42,7 @@ class PaginationFilter(BaseModel):
 
 
 class TagCreateSchema(BaseModel):
-    tags: str
+    tags: list[str]
 
 
 class TagPublicSchema(BaseModel):
@@ -149,7 +149,7 @@ class PostPublicSchema(BaseModel):
     updated_at: datetime
     published_at: datetime | None = None
     author_username: str
-    tags: list[TagPublicSchema] | None = None
+    tags: list[str] | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -169,7 +169,7 @@ class PostListItemSchema(BaseModel):
 class PostSearchSchema(PaginationFilter):
     title: str | None = None
     subtitle: str | None = None
-    tags: list[str] | None = None
+    tags: str | None = None
     is_published: bool | None = None
     author_username: str | None = None
     published_at: str | None = None
@@ -178,7 +178,3 @@ class PostSearchSchema(PaginationFilter):
 class PostSearchResultSchema(PostSearchSchema):
     total_items: int
     posts: list[PostListItemSchema]
-
-
-class PostAddTagSchema(BaseModel):
-    tags: str
