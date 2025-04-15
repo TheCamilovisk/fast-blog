@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -37,6 +39,10 @@ class PaginationFilter(BaseModel):
         super().__init__(**data)
         self.offset = max(self.offset, 0)
         self.limit = max(self.limit, 1)
+
+
+class TagCreateSchema(BaseModel):
+    tags: str
 
 
 class TagPublicSchema(BaseModel):
@@ -114,3 +120,65 @@ class AuthorUpdateSchema(BaseModel):
     lastname: str | None = None
     bio: str | None = None
     website: str | None = None
+
+
+class PostCreateSchema(BaseModel):
+    title: str
+    subtitle: str
+    content: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PostUpdateSchema(BaseModel):
+    title: str | None = None
+    subtitle: str | None = None
+    content: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PostPublicSchema(BaseModel):
+    id: int
+    title: str
+    subtitle: str
+    slug: str
+    content: str
+    is_published: bool
+    created_at: datetime
+    updated_at: datetime
+    published_at: datetime | None = None
+    author_username: str
+    tags: list[TagPublicSchema] | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PostListItemSchema(BaseModel):
+    id: int
+    title: str
+    subtitle: str
+    is_published: bool
+    created_at: datetime
+    author_username: str
+    post_url: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PostSearchSchema(PaginationFilter):
+    title: str | None = None
+    subtitle: str | None = None
+    tags: list[str] | None = None
+    is_published: bool | None = None
+    author_username: str | None = None
+    published_at: str | None = None
+
+
+class PostSearchResultSchema(PostSearchSchema):
+    total_items: int
+    posts: list[PostListItemSchema]
+
+
+class PostAddTagSchema(BaseModel):
+    tags: str

@@ -129,7 +129,7 @@ def another_user(session, mock_db_time):
 
 
 @pytest.fixture
-def another_profile(session, another_user, mock_db_time):
+def another_profile(session, another_user, profile, mock_db_time):
     with mock_db_time(model=Profile):
         profile = Profile(
             bio='This is another test bio',
@@ -169,7 +169,7 @@ def post(session, profile, mock_db_time):
             subtitle='Test Subtitle',
             slug='test-post',
             content='This is the content of the test post.',
-            author_id=profile.id,
+            author_id=profile.user_id,
         )
         session.add(post)
         session.commit()

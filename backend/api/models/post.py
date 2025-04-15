@@ -1,4 +1,12 @@
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from api.database import table_registry
@@ -13,7 +21,9 @@ class Post:
     subtitle: Mapped[str] = mapped_column(String(512), nullable=False)
     slug: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    is_published: Mapped[bool] = mapped_column(init=False, default=False)
+    is_published: Mapped[bool] = mapped_column(
+        Boolean, init=False, default=False
+    )
 
     created_at: Mapped[str] = mapped_column(
         DateTime, init=False, default=func.now()
@@ -22,11 +32,11 @@ class Post:
         DateTime, init=False, default=func.now(), onupdate=func.now()
     )
     published_at: Mapped[str] = mapped_column(
-        DateTime, init=False, default=func.now()
+        DateTime, init=False, default=None, nullable=True
     )
 
     author_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey('profiles.id'), unique=True, nullable=False
+        Integer, ForeignKey('profiles.id'), nullable=False
     )
 
     author = relationship('Profile', back_populates='posts')
