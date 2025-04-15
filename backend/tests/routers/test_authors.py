@@ -93,7 +93,7 @@ def test_create_author_conflict(client, profile, user_token):
     assert response.json()['detail'] == 'Profile already exists.'
 
 
-def test_create_author_forbidden(client, another_profile, user_token):
+def test_create_author_forbidden(client, profile, another_profile, user_token):
     author_data = {
         'firstname': 'John',
         'lastname': 'Doe',
@@ -154,7 +154,7 @@ def test_update_author_not_found(client, user_token):
     assert response.json()['detail'] == 'Author not found'
 
 
-def test_update_author_forbidden(client, another_profile, user_token):
+def test_update_author_forbidden(client, profile, another_profile, user_token):
     updated_data = {
         'firstname': 'UpdatedFirstName',
         'lastname': 'UpdatedLastName',
