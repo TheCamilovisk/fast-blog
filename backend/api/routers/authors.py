@@ -3,7 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_session
 from api.models.user import User
@@ -20,7 +20,7 @@ from api.security import get_current_user
 
 router = APIRouter(prefix='/authors', tags=['authors'])
 
-DBSession = Annotated[Session, Depends(get_session)]
+DBSession = Annotated[AsyncSession, Depends(get_session)]
 
 AuthorsQuery = Annotated[AuthorsSearchSchema, Query()]
 
@@ -30,8 +30,8 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 @router.get(
     '/', status_code=HTTPStatus.OK, response_model=AuthorsSearchResultSchema
 )
-def read_authors(session: DBSession, query_params: AuthorsQuery):
-    profiles = ProfileRepository.list_all(
+async def read_authors(session: DBSession, query_params: AuthorsQuery):
+    profiles = await ProfileRepository.list_all(
         session,
         username=query_params.username,
         firstname=query_params.firstname,
@@ -65,12 +65,12 @@ def read_authors(session: DBSession, query_params: AuthorsQuery):
     status_code=HTTPStatus.OK,
     response_model=AuthorPublicSchema,
 )
-def read_author(
+async def read_author(
     session: DBSession,
     user_id: int,
     current_user: CurrentUser,
 ):
-    profile = ProfileRepository.get_by_user_id(session, user_id)
+    profile = await ProfileRepository.get_by_user_id(session, user_id)
     if not profile:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -102,7 +102,7 @@ def read_author(
     status_code=HTTPStatus.CREATED,
     response_model=AuthorPublicSchema,
 )
-def crete_author(
+async def crete_author(
     session: DBSession,
     user_id: int,
     author_data: AuthorCreateSchema,
@@ -115,7 +115,7 @@ def crete_author(
         )
 
     try:
-        profile = ProfileRepository.create(
+        profile = await ProfileRepository.create(
             session,
             firstname=author_data.firstname,
             lastname=author_data.lastname,
@@ -124,7 +124,7 @@ def crete_author(
             user_id=user_id,
         )
     except IntegrityError:
-        session.rollback()
+        await session.rollback()
 
         raise HTTPException(
             status_code=HTTPStatus.CONFLICT,
@@ -150,13 +150,13 @@ def crete_author(
     status_code=HTTPStatus.OK,
     response_model=AuthorPublicSchema,
 )
-def update_author(
+async def update_author(
     session: DBSession,
     user_id: int,
     author_data: AuthorUpdateSchema,
     current_user: CurrentUser,
 ):
-    db_profile = ProfileRepository.get_by_user_id(session, user_id)
+    db_profile = await ProfileRepository.get_by_user_id(session, user_id)
     if not db_profile:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -170,7 +170,7 @@ def update_author(
         )
 
     try:
-        db_profile = ProfileRepository.update(
+        db_profile = await ProfileRepository.update(
             session,
             obj=db_profile,
             firstname=author_data.firstname,
@@ -203,12 +203,12 @@ def update_author(
     status_code=HTTPStatus.OK,
     response_model=MessageSchema,
 )
-def delete_author(
+async def delete_author(
     session: DBSession,
     author_id: int,
     current_user: CurrentUser,
 ):
-    db_profile = ProfileRepository.get_by_id(session, author_id)
+    db_profile = await ProfileRepository.get_by_id(session, author_id)
     if not db_profile:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -221,7 +221,7 @@ def delete_author(
             detail='You do not have permission to access this author profile',
         )
 
-    ProfileRepository.delete(session, db_profile)
+    await ProfileRepository.delete(session, db_profile)
 
     return {
         'message': 'Author deleted successfully',

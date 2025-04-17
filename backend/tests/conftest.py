@@ -2,9 +2,10 @@ from contextlib import contextmanager
 from datetime import datetime
 
 import pytest
+import pytest_asyncio
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, event
-from sqlalchemy.orm import Session
+from sqlalchemy import event
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from testcontainers.postgres import PostgresContainer
 
 from api.app import app
@@ -16,21 +17,23 @@ from api.models.user import User
 from api.security import create_access_token, get_password_hash
 
 
-@pytest.fixture(scope='session')
+@pytest_asyncio.fixture(scope='session')
 def engine():
     with PostgresContainer('postgres:17', driver='psycopg') as postgres:
-        _engine = create_engine(postgres.get_connection_url())
+        _engine = create_async_engine(postgres.get_connection_url())
         yield _engine
 
 
-@pytest.fixture
-def session(engine):
-    table_registry.metadata.create_all(engine)
+@pytest_asyncio.fixture
+async def session(engine):
+    async with engine.begin() as conn:
+        await conn.run_sync(table_registry.metadata.create_all)
 
-    with Session(engine) as session:
+    async with AsyncSession(engine, expire_on_commit=False) as session:
         yield session
 
-    table_registry.metadata.drop_all(engine)
+    async with engine.begin() as conn:
+        await conn.run_sync(table_registry.metadata.drop_all)
 
 
 @pytest.fixture
@@ -75,8 +78,8 @@ def mock_db_time():
     return _mock_db_time
 
 
-@pytest.fixture
-def user(session, mock_db_time):
+@pytest_asyncio.fixture
+async def user(session, mock_db_time):
     password = 'password'
     with mock_db_time(model=User):
         user = User(
@@ -85,16 +88,16 @@ def user(session, mock_db_time):
             email='defaultuser@example.com',
         )
         session.add(user)
-        session.commit()
-        session.refresh(user)
+        await session.commit()
+        await session.refresh(user)
 
         user.clean_password = password
 
         yield user
 
 
-@pytest.fixture
-def profile(session, user, mock_db_time):
+@pytest_asyncio.fixture
+async def profile(session, user, mock_db_time):
     with mock_db_time(model=Profile):
         profile = Profile(
             bio='This is a test bio',
@@ -104,14 +107,14 @@ def profile(session, user, mock_db_time):
             user_id=user.id,
         )
         session.add(profile)
-        session.commit()
-        session.refresh(profile)
+        await session.commit()
+        await session.refresh(profile)
 
         yield profile
 
 
-@pytest.fixture
-def another_user(session, mock_db_time):
+@pytest_asyncio.fixture
+async def another_user(session, mock_db_time):
     password = 'anotherpassword'
     with mock_db_time(model=User):
         user = User(
@@ -120,16 +123,16 @@ def another_user(session, mock_db_time):
             email='anotheruser@example.com',
         )
         session.add(user)
-        session.commit()
-        session.refresh(user)
+        await session.commit()
+        await session.refresh(user)
 
         user.clean_password = password
 
         yield user
 
 
-@pytest.fixture
-def another_profile(session, another_user, profile, mock_db_time):
+@pytest_asyncio.fixture
+async def another_profile(session, another_user, profile, mock_db_time):
     with mock_db_time(model=Profile):
         profile = Profile(
             bio='This is another test bio',
@@ -139,8 +142,8 @@ def another_profile(session, another_user, profile, mock_db_time):
             user_id=another_user.id,
         )
         session.add(profile)
-        session.commit()
-        session.refresh(profile)
+        await session.commit()
+        await session.refresh(profile)
 
         yield profile
 
@@ -150,19 +153,19 @@ def user_token(user):
     return create_access_token({'sub': user.email, 'exp': 30})
 
 
-@pytest.fixture
-def tag(session, mock_db_time):
+@pytest_asyncio.fixture
+async def tag(session, mock_db_time):
     with mock_db_time(model=Profile):
         tag = Tag(name='TestTag')
         session.add(tag)
-        session.commit()
-        session.refresh(tag)
+        await session.commit()
+        await session.refresh(tag)
 
         yield tag
 
 
-@pytest.fixture
-def post(session, profile, mock_db_time):
+@pytest_asyncio.fixture
+async def post(session, profile, mock_db_time):
     with mock_db_time(model=Profile):
         post = Post(
             title='Test Post',
@@ -172,7 +175,7 @@ def post(session, profile, mock_db_time):
             author_id=profile.user_id,
         )
         session.add(post)
-        session.commit()
-        session.refresh(post)
+        await session.commit()
+        await session.refresh(post)
 
         yield post

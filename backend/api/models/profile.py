@@ -29,7 +29,7 @@ class Profile:
         Integer, ForeignKey('users.id'), unique=True, nullable=False
     )
 
-    user = relationship('User', back_populates='profile')
+    user = relationship('User', back_populates='profile', lazy='selectin')
 
     posts: Mapped[list[Post]] = relationship(
         'Post',

@@ -5,7 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.params import Depends
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_session
 from api.models.post import Post
@@ -28,11 +28,11 @@ from api.security import get_current_user
 router = APIRouter(prefix='/posts', tags=['posts'])
 
 
-def get_current_user_profile(
-    session: Session = Depends(get_session),
+async def get_current_user_profile(
+    session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ) -> Profile:
-    profile = ProfileRepository.get_by_user_id(session, current_user.id)
+    profile = await ProfileRepository.get_by_user_id(session, current_user.id)
     if not profile:
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN,
@@ -58,7 +58,7 @@ def parse_post(post: Post) -> PostPublicSchema:
     )
 
 
-DBSession = Annotated[Session, Depends(get_session)]
+DBSession = Annotated[AsyncSession, Depends(get_session)]
 
 CurrentAuthor = Annotated[Profile, Depends(get_current_user_profile)]
 
@@ -74,7 +74,7 @@ async def create_post(
     post_data: PostCreateSchema,
 ):
     try:
-        post = PostRespository.create(
+        post = await PostRespository.create(
             session,
             title=post_data.title,
             subtitle=post_data.subtitle,
@@ -102,7 +102,7 @@ async def get_posts(
         if posts_filter.tags
         else []
     )
-    posts = PostRespository.list_all(
+    posts = await PostRespository.list_all(
         session,
         title=posts_filter.title,
         tags=tags,
@@ -144,7 +144,7 @@ async def get_posts(
     '/{post_id}', status_code=HTTPStatus.OK, response_model=PostPublicSchema
 )
 async def get_post(post_id: int, session: DBSession):
-    post = PostRespository.get_by_id(session, post_id)
+    post = await PostRespository.get_by_id(session, post_id)
     if not post:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -163,7 +163,7 @@ async def update_post(
     session: DBSession,
     current_author: CurrentAuthor,
 ):
-    post = PostRespository.get_by_id(session, post_id)
+    post = await PostRespository.get_by_id(session, post_id)
     if not post:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -176,7 +176,7 @@ async def update_post(
             detail='You do not have permission to update this post',
         )
 
-    post = PostRespository.update(
+    post = await PostRespository.update(
         session,
         obj=post,
         title=post_data.title,
@@ -193,7 +193,7 @@ async def update_post(
 async def delete_post(
     post_id: int, session: DBSession, current_author: CurrentAuthor
 ):
-    post = PostRespository.get_by_id(session, post_id)
+    post = await PostRespository.get_by_id(session, post_id)
     if not post:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -206,7 +206,7 @@ async def delete_post(
             detail='You do not have permission to delete this post',
         )
 
-    PostRespository.delete(session, obj=post)
+    await PostRespository.delete(session, obj=post)
     return {'message': 'Post deleted'}
 
 
@@ -220,7 +220,7 @@ async def publish_post(
     session: DBSession,
     current_author: CurrentAuthor,
 ):
-    post = PostRespository.get_by_id(session, post_id)
+    post = await PostRespository.get_by_id(session, post_id)
     if not post:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -235,7 +235,7 @@ async def publish_post(
 
     publish_date = datetime.now()
 
-    post = PostRespository.update(
+    post = await PostRespository.update(
         session,
         obj=post,
         is_published=True,
@@ -260,7 +260,7 @@ async def unpublish_post(
     session: DBSession,
     current_author: CurrentAuthor,
 ):
-    post = PostRespository.get_by_id(session, post_id)
+    post = await PostRespository.get_by_id(session, post_id)
     if not post:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -273,7 +273,7 @@ async def unpublish_post(
             detail='You do not have permission to unpublish this post',
         )
 
-    post = PostRespository.update(
+    post = await PostRespository.update(
         session,
         obj=post,
         is_published=False,
@@ -299,7 +299,7 @@ async def add_tags_to_post(
     session: DBSession,
     current_author: CurrentAuthor,
 ):
-    post = PostRespository.get_by_id(session, post_id)
+    post = await PostRespository.get_by_id(session, post_id)
     if not post:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -312,9 +312,10 @@ async def add_tags_to_post(
             detail='You do not have permission to add tags to this post',
         )
 
-    extracted_tags = TagRepository.find_or_create_multiple(
+    extracted_tags = await TagRepository.find_or_create_multiple(
         session, tags=tags.tags
     )
-    PostRespository.add_tags(session, post, extracted_tags)
+
+    await PostRespository.add_tags(session, post, extracted_tags)
 
     return parse_post(post)

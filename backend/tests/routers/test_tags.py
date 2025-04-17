@@ -1,5 +1,7 @@
 from http import HTTPStatus
 
+import pytest
+
 from api.models.tag import Tag
 
 
@@ -14,10 +16,11 @@ def test_list_tags_ok(client, tag):
     assert response_data['tags'][0]['name'] == tag.name
 
 
-def test_list_tags_with_pattern_ok(client, tag, session):
+@pytest.mark.asyncio
+async def test_list_tags_with_pattern_ok(client, tag, session):
     another_tag = Tag(name='AnotherTag')
     session.add(another_tag)
-    session.commit()
+    await session.commit()
 
     response = client.get('/tags/?pattern=Another')
 
@@ -29,11 +32,12 @@ def test_list_tags_with_pattern_ok(client, tag, session):
     assert response_data['tags'][0]['name'] == another_tag.name
 
 
-def test_list_tags_with_pagination_ok(client, session):
+@pytest.mark.asyncio
+async def test_list_tags_with_pagination_ok(client, session):
     for i in range(1, 6):
         tag = Tag(name=f'Tag{i}')
         session.add(tag)
-    session.commit()
+    await session.commit()
 
     response = client.get('/tags/?limit=10&offset=0')
 

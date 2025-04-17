@@ -9,7 +9,7 @@ app = FastAPI()
 
 
 @app.get('/', status_code=HTTPStatus.OK, response_model=MessageSchema)
-def get_root():
+async def get_root():
     return {'message': 'Hello World!!!'}
 
 

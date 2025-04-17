@@ -1,5 +1,5 @@
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.models.user import User
 
@@ -10,9 +10,9 @@ class UserRepository(BaseRepository[User]):
     model = User
 
     @classmethod
-    def list_all(
+    async def list_all(
         cls,
-        session: Session,
+        session: AsyncSession,
         username: str | None = None,
         email: str | None = None,
         limit: int = 10,
@@ -26,4 +26,6 @@ class UserRepository(BaseRepository[User]):
         if email:
             query = query.filter(cls.model.email.ilike(f'%{email}%'))
 
-        return session.scalars(query.offset(offset).limit(limit)).all()
+        query = await session.scalars(query.offset(offset).limit(limit))
+
+        return query.all()

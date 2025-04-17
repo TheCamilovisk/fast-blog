@@ -244,7 +244,7 @@ def test_unpublish_post_forbidden(client, another_profile, post, user_token):
 
 
 def test_add_tags_to_post_ok(client, post, user_token):
-    tags = 'tag1, tag2'
+    tags = ['tag1', 'tag2']
 
     response = client.post(
         f'/posts/{post.id}/tags',
@@ -255,13 +255,12 @@ def test_add_tags_to_post_ok(client, post, user_token):
     assert response.status_code == HTTPStatus.OK
     response_data = response.json()
     assert len(response_data['tags']) == 2  # noqa: PLR2004
-    tags_names = [tag['name'] for tag in response_data['tags']]
-    assert 'tag1' in tags_names
-    assert 'tag2' in tags_names
+    assert 'tag1' in response_data['tags']
+    assert 'tag2' in response_data['tags']
 
 
 def test_add_tags_to_post_not_found(client, user_token, profile):
-    tags = 'tag1, tag2'
+    tags = ['tag1', 'tag2']
 
     response = client.post(
         '/posts/999/tags',
@@ -274,7 +273,7 @@ def test_add_tags_to_post_not_found(client, user_token, profile):
 
 
 def test_add_tags_to_post_forbidden(client, another_profile, post, user_token):
-    tags = 'tag1, tag2'
+    tags = ['tag1', 'tag2']
 
     response = client.post(
         f'/posts/{post.id}/tags',

@@ -47,4 +47,5 @@ class Post:
         secondary='posts_tags',
         back_populates='posts',
         lazy='selectin',
+        join_depth=2,
     )

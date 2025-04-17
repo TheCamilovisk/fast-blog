@@ -3,7 +3,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.models.post import Post
 from api.models.tag import Tag
@@ -18,9 +18,9 @@ class PostRespository(BaseRepository[Post]):
     model = Post
 
     @classmethod
-    def list_all(  # noqa: PLR0913, PLR0917
+    async def list_all(  # noqa: PLR0913, PLR0917
         cls,
-        session: Session,
+        session: AsyncSession,
         title: str = None,
         tags: list[str] = [],
         author_username: str = None,
@@ -29,18 +29,18 @@ class PostRespository(BaseRepository[Post]):
         limit: int = 10,
         offset: int = 0,
     ) -> list[Post]:
-        query = select(cls.model)
+        query = select(Post)
 
         if published_only:
-            query = query.filter(cls.model.is_published.is_(True))
+            query = query.filter(Post.is_published.is_(True))
 
         if published_at:
-            query = query.filter(cls.model.published_at >= published_at)
+            query = query.filter(Post.published_at >= published_at)
 
         if title:
             query = query.filter(
-                cls.model.title.ilike(f'%{title}%')
-                | cls.model.subtitle.ilike(f'%{title}%')
+                Post.title.ilike(f'%{title}%')
+                | Post.subtitle.ilike(f'%{title}%')
             )
 
         if tags:
@@ -48,19 +48,19 @@ class PostRespository(BaseRepository[Post]):
 
         if author_username:
             query = query.filter(
-                cls.model.author.username.ilike(f'%{author_username}%')
+                Post.author.username.ilike(f'%{author_username}%')
             )
 
-        query = (
-            query.order_by(cls.model.published_at.desc())
+        query = await session.scalars(
+            query.order_by(Post.published_at.desc())
             .offset(offset)
             .limit(limit)
         )
 
-        return session.scalars(query).all()
+        return query.all()
 
     @classmethod
-    def create(cls, session: Session, **kwargs) -> Post:
+    async def create(cls, session: AsyncSession, **kwargs) -> Post:
         post_params = copy.copy(kwargs)
         for key, value in post_params.items():
             if key == 'is_published' and value is True:
@@ -71,16 +71,18 @@ class PostRespository(BaseRepository[Post]):
         post = Post(**post_params)
 
         session.add(post)
-        session.commit()
-        session.refresh(post)
+        await session.commit()
+        await session.refresh(post)
         return post
 
     @classmethod
-    def add_tags(cls, session: Session, post: Post, tags: list[Tag]) -> Post:
+    async def add_tags(
+        cls, session: AsyncSession, post: Post, tags: list[Tag]
+    ) -> Post:
         for tag in tags:
             if tag not in post.tags:
                 post.tags.append(tag)
 
-        session.commit()
-        session.refresh(post)
+        await session.commit()
+        await session.refresh(post)
         return post

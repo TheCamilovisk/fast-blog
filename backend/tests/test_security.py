@@ -45,28 +45,31 @@ def test_verify_password():
     assert not verify_password('wrongpassword', hashed_password)
 
 
-def test_get_current_user_ok(session, user, user_token):
-    result = get_current_user(session=session, token=user_token)
+@pytest.mark.asyncio
+async def test_get_current_user_ok(session, user, user_token):
+    result = await get_current_user(session=session, token=user_token)
 
     assert result == user
 
 
-def test_get_current_user_invalid_token(session, user):
+@pytest.mark.asyncio
+async def test_get_current_user_invalid_token(session, user):
     with pytest.raises(HTTPException) as exc_info:
-        get_current_user(session=session, token='invalidtoken')
+        await get_current_user(session=session, token='invalidtoken')
 
     assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED
     assert 'could not validate credentials' in str(exc_info.value).lower()
 
 
-def test_get_current_user_user_not_found(session, user, user_token):
-    db_user = session.scalar(select(User).filter(User.id == user.id))
+@pytest.mark.asyncio
+async def test_get_current_user_user_not_found(session, user, user_token):
+    db_user = await session.scalar(select(User).filter(User.id == user.id))
 
-    session.delete(db_user)
-    session.commit()
+    await session.delete(db_user)
+    await session.commit()
 
     with pytest.raises(HTTPException) as exc_info:
-        get_current_user(session=session, token=user_token)
+        await get_current_user(session=session, token=user_token)
 
     assert exc_info.value.status_code == HTTPStatus.UNAUTHORIZED
     assert 'could not validate credentials' in str(exc_info.value).lower()

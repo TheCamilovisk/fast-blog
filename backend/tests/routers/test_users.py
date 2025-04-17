@@ -86,7 +86,7 @@ def test_update_username_ok(client, user, user_token):
         headers={'Authorization': f'Bearer {user_token}'},
     )
 
-    # assert response.status_code == HTTPStatus.OK
+    assert response.status_code == HTTPStatus.OK
     response_data = response.json()
     assert response_data['username'] == updated_data['username']
     assert response_data['email'] == user.email

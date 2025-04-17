@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.models.profile import Profile
 from api.repositories.base_repository import BaseRepository
@@ -8,9 +9,9 @@ class ProfileRepository(BaseRepository[Profile]):
     model = Profile
 
     @classmethod
-    def list_all(  # noqa: PLR0913, PLR0917
+    async def list_all(  # noqa: PLR0913, PLR0917
         cls,
-        session,
+        session: AsyncSession,
         firstname: str | None = None,
         lastname: str | None = None,
         username: str | None = None,
@@ -26,10 +27,12 @@ class ProfileRepository(BaseRepository[Profile]):
         if username:
             query = query.where(cls.model.username == username)
 
-        query = query.limit(limit).offset(offset)
-        return session.scalars(query).all()
+        query = await session.scalars(query.limit(limit).offset(offset))
+        return query.all()
 
     @classmethod
-    def get_by_user_id(cls, session, user_id: int) -> Profile | None:
+    async def get_by_user_id(
+        cls, session: AsyncSession, user_id: int
+    ) -> Profile | None:
         query = select(cls.model).where(cls.model.user_id == user_id)
-        return session.scalar(query)
+        return await session.scalar(query)

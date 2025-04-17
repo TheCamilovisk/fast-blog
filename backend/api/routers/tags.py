@@ -23,7 +23,7 @@ async def list_tags(
     session: DBSession,
     params: QueryParams,
 ):
-    tags = TagRepository.list_all(
+    tags = await TagRepository.list_all(
         session,
         pattern=params.pattern,
         limit=params.limit,
