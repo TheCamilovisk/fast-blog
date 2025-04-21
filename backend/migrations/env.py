@@ -11,12 +11,12 @@ from api.models.posts_tags import posts_tags  # noqa: F401
 from api.models.profile import Profile  # noqa: F401
 from api.models.tag import Tag  # noqa: F401
 from api.models.user import User  # noqa: F401
-from api.settings import Settings
+from api.settings import get_settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-config.set_main_option('sqlalchemy.url', Settings().DATABASE_URL)
+config.set_main_option('sqlalchemy.url', get_settings().DATABASE_URL)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

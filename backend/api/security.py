@@ -12,9 +12,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_session
 from api.models.user import User
-from api.settings import Settings
+from api.settings import get_settings
 
-settings = Settings()
+settings = get_settings()
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
