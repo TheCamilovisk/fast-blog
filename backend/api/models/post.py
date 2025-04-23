@@ -39,7 +39,7 @@ class Post:
         Integer, ForeignKey('profiles.id'), nullable=False
     )
 
-    author = relationship('Profile', back_populates='posts')
+    author = relationship('Profile', back_populates='posts', lazy='selectin')
 
     tags: Mapped[list['Tag']] = relationship(  # noqa: F821 # type: ignore
         'Tag',

@@ -38,4 +38,5 @@ class Profile:
         uselist=True,
         cascade='all, delete-orphan',
         lazy='selectin',
+        join_depth=2,
     )
