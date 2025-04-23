@@ -88,7 +88,7 @@ class AuthorListSchema(BaseModel):
     username: str
     firstname: str
     lastname: str
-    author_url: str
+    author_url: str | None = None
 
 
 class AuthorsSearchResultSchema(BaseModel):
@@ -147,8 +147,8 @@ class PostPublicSchema(BaseModel):
     is_published: bool
     created_at: datetime
     updated_at: datetime
+    author: AuthorListSchema
     published_at: datetime | None = None
-    author_username: str
     tags: list[str] | None = None
 
     model_config = ConfigDict(from_attributes=True)
@@ -160,7 +160,7 @@ class PostListItemSchema(BaseModel):
     subtitle: str
     is_published: bool
     created_at: datetime
-    author_username: str
+    author: AuthorListSchema
     post_url: str
 
     model_config = ConfigDict(from_attributes=True)

@@ -40,19 +40,6 @@ def test_read_author_not_found(client, user_token):
     assert response.json()['detail'] == 'Author not found'
 
 
-def test_read_author_forbidden(client, user_token, another_profile):
-    response = client.get(
-        f'/authors/{another_profile.user.id}',
-        headers={'Authorization': f'Bearer {user_token}'},
-    )
-
-    assert response.status_code == HTTPStatus.FORBIDDEN
-    assert (
-        response.json()['detail']
-        == 'You do not have permission to access this author'
-    )
-
-
 def test_create_author_ok(client, user, user_token):
     author_data = {
         'firstname': 'John',

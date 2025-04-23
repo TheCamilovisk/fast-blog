@@ -15,6 +15,7 @@ from api.repositories.post_repository import PostRespository
 from api.repositories.profile_repository import ProfileRepository
 from api.repositories.tag_repository import TagRepository
 from api.schemas import (
+    AuthorListSchema,
     MessageSchema,
     PostCreateSchema,
     PostPublicSchema,
@@ -42,6 +43,15 @@ async def get_current_user_profile(
     return profile
 
 
+def parser_author(author: Profile) -> AuthorListSchema:
+    return AuthorListSchema(
+        id=author.user_id,
+        username=author.user.username,
+        firstname=author.firstname,
+        lastname=author.lastname,
+    )
+
+
 def parse_post(post: Post) -> PostPublicSchema:
     return PostPublicSchema(
         id=post.id,
@@ -53,7 +63,7 @@ def parse_post(post: Post) -> PostPublicSchema:
         created_at=post.created_at,
         updated_at=post.updated_at,
         published_at=post.published_at,
-        author_username=post.author.user.username,
+        author=parser_author(post.author),
         tags=[tag.name for tag in post.tags],
     )
 
@@ -127,7 +137,7 @@ async def get_posts(
             'subtitle': post.subtitle,
             'is_published': post.is_published,
             'created_at': post.created_at,
-            'author_username': post.author.user.username,
+            'author': parser_author(post.author),
             'post_url': router.url_path_for('get_post', post_id=post.id),
         }
         for post in posts
