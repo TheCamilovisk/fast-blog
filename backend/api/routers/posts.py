@@ -112,7 +112,7 @@ async def get_posts(
         if posts_filter.tags
         else []
     )
-    posts = await PostRespository.list_all(
+    (total_items, posts) = await PostRespository.list_all(
         session,
         title=posts_filter.title,
         tags=tags,
@@ -127,8 +127,6 @@ async def get_posts(
             status_code=HTTPStatus.NOT_FOUND,
             detail='No posts found',
         )
-
-    total_items = len(posts)
 
     posts = [
         {
@@ -243,6 +241,12 @@ async def publish_post(
             detail='You do not have permission to publish this post',
         )
 
+    if post.is_published:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail='Post is already published',
+        )
+
     publish_date = datetime.now()
 
     post = await PostRespository.update(
@@ -281,6 +285,12 @@ async def unpublish_post(
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN,
             detail='You do not have permission to unpublish this post',
+        )
+
+    if not post.is_published:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail='Post is already unpublished',
         )
 
     post = await PostRespository.update(

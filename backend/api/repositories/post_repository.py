@@ -1,8 +1,9 @@
 import copy
 from datetime import datetime
+from typing import Tuple
 from uuid import uuid4
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.models.post import Post
@@ -28,7 +29,7 @@ class PostRespository(BaseRepository[Post]):
         published_at: datetime = None,
         limit: int = 10,
         offset: int = 0,
-    ) -> list[Post]:
+    ) -> Tuple[int, list[Post]]:
         query = select(Post)
 
         if published_only:
@@ -51,13 +52,18 @@ class PostRespository(BaseRepository[Post]):
                 Post.author.username.ilike(f'%{author_username}%')
             )
 
+        count_query = select(func.count()).select_from(query.subquery())
+
+        total_result = await session.execute(count_query)
+        total = total_result.scalar_one()
+
         query = await session.scalars(
             query.order_by(Post.published_at.desc())
             .offset(offset)
             .limit(limit)
         )
 
-        return query.all()
+        return (total, query.all())
 
     @classmethod
     async def create(cls, session: AsyncSession, **kwargs) -> Post:
