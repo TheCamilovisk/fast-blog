@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.models.user import User
@@ -29,3 +29,15 @@ class UserRepository(BaseRepository[User]):
         query = await session.scalars(query.offset(offset).limit(limit))
 
         return query.all()
+
+    @classmethod
+    async def find_by_id_or_email(
+        cls, session: AsyncSession, identifier: str
+    ) -> User | None:
+        query = await session.scalar(
+            select(User).filter(
+                or_(User.username == identifier, User.email == identifier)
+            )
+        )
+
+        return query
