@@ -88,7 +88,6 @@ class AuthorListSchema(BaseModel):
     username: str
     firstname: str
     lastname: str
-    author_url: str | None = None
 
 
 class AuthorsSearchResultSchema(BaseModel):
