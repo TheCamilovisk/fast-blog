@@ -68,19 +68,12 @@ async def read_authors(session: DBSession, query_params: AuthorsQuery):
 async def read_author(
     session: DBSession,
     user_id: int,
-    current_user: CurrentUser,
 ):
     profile = await ProfileRepository.get_by_user_id(session, user_id)
     if not profile:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail='Author not found',
-        )
-
-    if profile.user.id != current_user.id:
-        raise HTTPException(
-            status_code=HTTPStatus.FORBIDDEN,
-            detail='You do not have permission to access this author',
         )
 
     author = {
