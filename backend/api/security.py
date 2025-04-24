@@ -68,6 +68,29 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return PWD_CONTEXT.verify(plain_password, hashed_password)
 
 
+def get_refresh_token_sub(token: str) -> str:
+    try:
+        payload = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        now = datetime.now(ZoneInfo('UTC'))
+        if datetime.fromtimestamp(payload.get('exp')) < now:
+            raise HTTPException(
+                status_code=HTTPStatus.UNAUTHORIZED,
+                detail='Refresh token expired',
+            )
+    except DecodeError:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED,
+            detail='Could not validate credentials',
+        )
+    except ExpiredSignatureError:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED,
+            detail='Refresh token has expired',
+        )
+
+    return payload.get('sub')
+
+
 async def get_current_user(
     session: Annotated[AsyncSession, Depends(get_session)],
     token: OAuth2Scheme,
@@ -79,6 +102,14 @@ async def get_current_user(
 
     try:
         payload = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
+        now = datetime.now(ZoneInfo('UTC'))
+        if datetime.fromtimestamp(payload.get('exp')) < now:
+            raise HTTPException(
+                status_code=HTTPStatus.UNAUTHORIZED,
+                detail='Refresh token expired',
+            )
+
         subject_email = payload.get('sub')
 
         if not subject_email:

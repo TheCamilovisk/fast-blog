@@ -32,7 +32,6 @@ SearchParams = Annotated[UserSearchSchema, Query()]
     '/', status_code=HTTPStatus.OK, response_model=UsersSearchResultSchema
 )
 async def read_users(
-    current_user: CurrentUser,
     session: DBSession,
     pagination: SearchParams,
 ):

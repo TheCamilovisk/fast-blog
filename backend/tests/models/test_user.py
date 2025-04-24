@@ -32,6 +32,7 @@ async def test_user_create_ok(session, mock_db_time):
         'updated_at': time,
         'superuser': False,
         'profile': None,
+        'refresh_tokens': [],
     }
 
 
