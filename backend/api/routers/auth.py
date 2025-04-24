@@ -8,7 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.database import get_session
 from api.repositories.user_repository import UserRepository
 from api.schemas import TokenSchema
-from api.security import create_access_token, verify_password
+from api.security import (
+    create_access_token,
+    create_refresh_token,
+    verify_password,
+)
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 
@@ -32,8 +36,10 @@ async def login_for_access_token(
     access_token = create_access_token(
         data={'sub': user.email},
     )
+    refresh_token = create_refresh_token(data={'sub': user.email})
 
     return {
         'access_token': access_token,
+        'refresh_token': refresh_token,
         'token_type': 'bearer',
     }
