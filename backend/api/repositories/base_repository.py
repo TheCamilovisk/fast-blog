@@ -1,6 +1,6 @@
-from typing import Generic, Type, TypeVar
+from typing import Generic, Tuple, Type, TypeVar
 
-from sqlalchemy import select
+from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 T = TypeVar('T')
@@ -16,12 +16,22 @@ class BaseRepository(Generic[T]):
         )
 
     @classmethod
+    async def count_query(cls, session: AsyncSession, query: Select[Tuple[T]]):
+        count = select(func.count()).select_from(query.subquery())
+        count_result = await session.execute(count)
+        return count_result.scalar_one()
+
+    @classmethod
     async def list_all(
         cls, session: AsyncSession, limit: int = 10, offset: int = 0
-    ) -> list[T]:
-        return await session.scalars(
-            select(cls.model).offset(offset).limit(limit)
-        ).all()
+    ) -> Tuple[int, list[T]]:
+        query = select(cls.model).offset(offset).limit(limit)
+
+        total = await cls.count_query(query)
+
+        query = await session.scalars(session, query)
+
+        return total, query.all()
 
     @classmethod
     async def create(cls, session: AsyncSession, **kwargs) -> T:

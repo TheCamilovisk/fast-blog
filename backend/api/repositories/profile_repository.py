@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,7 +19,7 @@ class ProfileRepository(BaseRepository[Profile]):
         username: str | None = None,
         limit: int = 10,
         offset: int = 0,
-    ) -> list[Profile]:
+    ) -> Tuple[int, list[Profile]]:
         query = select(cls.model)
 
         if firstname:
@@ -27,8 +29,10 @@ class ProfileRepository(BaseRepository[Profile]):
         if username:
             query = query.where(cls.model.username == username)
 
+        total = await cls.count_query(session, query)
+
         query = await session.scalars(query.limit(limit).offset(offset))
-        return query.all()
+        return total, query.all()
 
     @classmethod
     async def get_by_user_id(

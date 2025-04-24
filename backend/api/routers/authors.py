@@ -31,7 +31,7 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
     '/', status_code=HTTPStatus.OK, response_model=AuthorsSearchResultSchema
 )
 async def read_authors(session: DBSession, query_params: AuthorsQuery):
-    profiles = await ProfileRepository.list_all(
+    total, profiles = await ProfileRepository.list_all(
         session,
         username=query_params.username,
         firstname=query_params.firstname,
@@ -55,7 +55,7 @@ async def read_authors(session: DBSession, query_params: AuthorsQuery):
 
     return {
         'search_params': query_params,
-        'total_items': len(authors),
+        'total_items': total,
         'authors': authors,
     }
 

@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,7 +19,7 @@ class UserRepository(BaseRepository[User]):
         email: str | None = None,
         limit: int = 10,
         offset: int = 0,
-    ) -> list[User]:
+    ) -> Tuple[int, list[User]]:
         query = select(cls.model)
 
         if username:
@@ -26,9 +28,11 @@ class UserRepository(BaseRepository[User]):
         if email:
             query = query.filter(cls.model.email.ilike(f'%{email}%'))
 
+        total = await cls.count_query(session, query)
+
         query = await session.scalars(query.offset(offset).limit(limit))
 
-        return query.all()
+        return total, query.all()
 
     @classmethod
     async def find_by_id_or_email(

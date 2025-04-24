@@ -176,9 +176,9 @@ def test_delete_post_forbidden(client, another_profile, post, user_token):
     )
 
 
-def test_publish_post_ok(client, post, user_token):
+def test_publish_post_ok(client, unpublished_post, user_token):
     response = client.post(
-        f'/posts/{post.id}/publish',
+        f'/posts/{unpublished_post.id}/publish',
         headers={'Authorization': f'Bearer {user_token}'},
     )
 

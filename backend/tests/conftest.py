@@ -165,7 +165,7 @@ async def tag(session, mock_db_time):
 
 
 @pytest_asyncio.fixture
-async def post(session, profile, mock_db_time):
+async def unpublished_post(session, profile, mock_db_time):
     with mock_db_time(model=Profile):
         post = Post(
             title='Test Post',
@@ -174,8 +174,22 @@ async def post(session, profile, mock_db_time):
             content='This is the content of the test post.',
             author_id=profile.user_id,
         )
+
         session.add(post)
         await session.commit()
         await session.refresh(post)
 
         yield post
+
+
+@pytest_asyncio.fixture
+async def post(session, unpublished_post, mock_db_time):
+    with mock_db_time(model=Profile) as time:
+        unpublished_post.is_published = True
+        unpublished_post.published_at = time
+
+        session.add(unpublished_post)
+        await session.commit()
+        await session.refresh(unpublished_post)
+
+        yield unpublished_post

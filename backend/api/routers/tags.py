@@ -23,7 +23,7 @@ async def list_tags(
     session: DBSession,
     params: QueryParams,
 ):
-    tags = await TagRepository.list_all(
+    total, tags = await TagRepository.list_all(
         session,
         pattern=params.pattern,
         limit=params.limit,
@@ -32,6 +32,6 @@ async def list_tags(
 
     return {
         'search_params': params,
-        'total_items': len(tags),
+        'total_items': total,
         'tags': tags,
     }

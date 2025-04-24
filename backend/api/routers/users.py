@@ -36,7 +36,7 @@ async def read_users(
     session: DBSession,
     pagination: SearchParams,
 ):
-    users = await UserRepository.list_all(
+    total, users = await UserRepository.list_all(
         session,
         username=pagination.username,
         email=pagination.email,
@@ -45,7 +45,7 @@ async def read_users(
     )
     return {
         'search_params': pagination,
-        'total_items': len(users),
+        'total_items': total,
         'users': users,
     }
 

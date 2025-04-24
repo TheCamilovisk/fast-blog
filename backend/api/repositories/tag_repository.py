@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,12 +17,15 @@ class TagRepository(BaseRepository[Tag]):
         pattern: str | None = None,
         limit: int = 10,
         offset: int = 0,
-    ) -> list[Tag]:
+    ) -> Tuple[int, list[Tag]]:
         query = select(Tag)
         if pattern:
             query = query.filter(Tag.name.ilike(f'%{pattern}%'))
+
+        total = await cls.count_query(session, query)
+
         query = await session.scalars(query.offset(offset).limit(limit))
-        return query.all()
+        return total, query.all()
 
     @classmethod
     async def find_or_create_multiple(
