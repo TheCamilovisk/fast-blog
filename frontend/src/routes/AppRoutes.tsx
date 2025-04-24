@@ -5,6 +5,8 @@ import Post from "../pages/Post";
 import Contact from "../pages/Contact";
 import NotFound from "../pages/NotFound";
 import Author from "../pages/Author";
+import Login from "../pages/Login";
+import Logout from "../pages/Logout";
 
 function App() {
   return (
@@ -14,6 +16,8 @@ function App() {
         <Route path="post/:id" element={<Post />} />
         <Route path="author/:id" element={<Author />} />
         <Route path="contact" element={<Contact />} />
+        <Route path="login" element={<Login />} />
+        <Route path="logout" element={<Logout />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
+import { useAuthStore } from "../auth/authStore";
 
 const Header = () => {
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn());
+
   return (
     <header>
       <nav>
@@ -16,6 +19,13 @@ const Header = () => {
           </li>
           <li>
             <Link to="/contact">Contact</Link>
+          </li>
+          <li>
+            {isLoggedIn ? (
+              <Link to="/logout">Logout</Link>
+            ) : (
+              <Link to="/login">Login</Link>
+            )}
           </li>
         </ul>
       </nav>
