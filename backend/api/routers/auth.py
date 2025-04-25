@@ -39,15 +39,18 @@ async def login_for_access_token(
             detail='Incorrect username or password',
         )
 
-    access_token = create_access_token(
+    access_token, access_token_expiration = create_access_token(
         data={'sub': user.email},
     )
-    refresh_token = create_refresh_token(data={'sub': user.email})
+    refresh_token, refresh_token_expiration = create_refresh_token(
+        data={'sub': user.email}
+    )
 
     await RefreshTokenService.create(session, refresh_token, user.id)
 
     return {
         'access_token': access_token,
+        'expires_in': access_token_expiration,
         'refresh_token': refresh_token,
         'token_type': 'bearer',
     }
@@ -69,8 +72,14 @@ async def refresh_token(refresh_token: RToken, session: DBSession) -> dict:
             status_code=HTTPStatus.UNAUTHORIZED, detail='Invalid refresh token'
         )
 
-    access_token = create_access_token(data={'sub': user.email})
-    return {'access_token': access_token, 'token_type': 'bearer'}
+    access_token, access_token_expiration = create_access_token(
+        data={'sub': user.email}
+    )
+    return {
+        'access_token': access_token,
+        'expires_in': access_token_expiration,
+        'token_type': 'bearer',
+    }
 
 
 @router.post(

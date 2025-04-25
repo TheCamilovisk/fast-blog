@@ -42,22 +42,20 @@ OAuth2Scheme = Annotated[
 
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
-    expire = datetime.now(tz=ZoneInfo('UTC')) + timedelta(
-        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
-    )
+    expire_delta = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(tz=ZoneInfo('UTC')) + expire_delta
     to_encode.update({'exp': expire})
     encoded_jwt = encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+    return encoded_jwt, expire_delta.total_seconds()
 
 
 def create_refresh_token(data: dict) -> str:
     to_encode = data.copy()
-    expire = datetime.now(tz=ZoneInfo('UTC')) + timedelta(
-        days=REFRESH_TOKEN_EXPIRE_DAYS
-    )
+    expire_delta = timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    expire = datetime.now(tz=ZoneInfo('UTC')) + expire_delta
     to_encode.update({'exp': expire})
     encoded_jwt = encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+    return encoded_jwt, expire_delta.total_seconds()
 
 
 def get_password_hash(password: str) -> str:
@@ -71,8 +69,11 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_refresh_token_sub(token: str) -> str:
     try:
         payload = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        now = datetime.now(ZoneInfo('UTC'))
-        if datetime.fromtimestamp(payload.get('exp')) < now:
+        now = datetime.now(tz=ZoneInfo('UTC'))
+        if (
+            datetime.fromtimestamp(payload.get('exp'), tz=ZoneInfo('UTC'))
+            < now
+        ):
             raise HTTPException(
                 status_code=HTTPStatus.UNAUTHORIZED,
                 detail='Refresh token expired',
