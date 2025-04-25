@@ -7,7 +7,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.models.post import Post
+from api.models.profile import Profile
 from api.models.tag import Tag
+from api.models.user import User
 from api.repositories.base_repository import BaseRepository
 
 
@@ -49,7 +51,11 @@ class PostRespository(BaseRepository[Post]):
 
         if author_username:
             query = query.filter(
-                Post.author.username.ilike(f'%{author_username}%')
+                Post.author.has(
+                    Profile.user.has(
+                        User.username.ilike(f'%{author_username}%')
+                    )
+                )
             )
 
         total = await cls.count_query(session, query)
