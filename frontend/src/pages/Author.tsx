@@ -1,38 +1,44 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
-type AuthorProps = {
-  id: string;
-  username: string;
-  firstname: string;
-  lastname: string;
-};
+import { AuthorProps, fetchAuthor } from "../services/authorService";
+import AuthorInfo from "../components/authors/AuthorInfo";
+import { fetchPosts, PostListItem } from "../services/postService";
+import Pagination from "../components/Pagination";
+import PostList from "../components/posts/PostList";
 
 const Author = () => {
   const { id } = useParams();
   const [author, setAuthor] = useState<AuthorProps | null>(null);
+
+  const [posts, setPosts] = useState<PostListItem[]>([]);
+  const [offset, setOffset] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const limit = 10;
+
   useEffect(() => {
-    const fetchAuthor = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/authors/${id}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch author");
-        }
-        const data: AuthorProps = await response.json();
-        setAuthor(data);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (err: any) {
-        setError(err.message);
+        const authorData = await fetchAuthor(Number(id));
+        setAuthor(authorData);
+
+        const postsData = await fetchPosts(offset, limit, authorData.username);
+        setPosts(postsData.posts);
+        setTotalItems(postsData.totalItems);
+      } catch (error) {
+        setError("Error fetching author data: " + error);
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) fetchAuthor();
-  }, [id]);
+    if (id) fetchData();
+  }, [id, offset]);
+
+  const totalPages = Math.ceil(totalItems / limit);
 
   if (loading) return <p>Loading author...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -40,9 +46,18 @@ const Author = () => {
 
   return (
     <article>
-      <h1>
-        {author.firstname} {author.lastname} (a.k.a. {author.username})
-      </h1>
+      <AuthorInfo author={author} />
+
+      <h1>{author.username}'s Posts</h1>
+
+      <PostList posts={posts} />
+
+      <Pagination
+        totalPages={totalPages}
+        limit={limit}
+        offset={offset}
+        handleSetOffset={setOffset}
+      />
     </article>
   );
 };

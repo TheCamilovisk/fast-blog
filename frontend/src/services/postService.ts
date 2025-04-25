@@ -20,10 +20,11 @@ type PostList = {
 
 export const fetchPosts = async (
   offset: number,
-  limit: number
+  limit: number,
+  author: string | null = null
 ): Promise<PostList> => {
   const res = await publicApi.get("/posts", {
-    params: { offset, limit },
+    params: { offset, limit, author_username: author },
   });
 
   const mappedPosts = res.data.posts.map(

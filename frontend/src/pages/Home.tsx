@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { PostListItem, fetchPosts } from "../services/postService";
-import PostList from "../components/PostList";
+import PostList from "../components/posts/PostList";
 import Pagination from "../components/Pagination";
 
 const Home = () => {
@@ -17,7 +17,7 @@ const Home = () => {
         setPosts(data.posts);
         setTotalItems(data.totalItems);
       } catch (error) {
-        console.error("Error fetching posts:", error);
+        console.error("Error fetching posts: ", error);
       }
     };
 
