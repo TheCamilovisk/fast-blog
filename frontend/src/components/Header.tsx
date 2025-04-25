@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useAuthStore } from "../auth/authStore";
 
 const Header = () => {
-  const isLoggedIn = useAuthStore((state) => state.isLoggedIn());
+  const isLoggedIn = useAuthStore((state) => state.checkTokenValidity());
 
   return (
     <header>

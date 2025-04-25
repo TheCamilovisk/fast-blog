@@ -1,13 +1,13 @@
 import { FormEvent, useState } from "react";
-import { publicApi } from "../api/axios";
 import { useAuthStore } from "../auth/authStore";
 import { useNavigate } from "react-router-dom";
+import { getTokens } from "../services/tokenService";
 
 const Login = () => {
   const [identifier, setIdentifier] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
-  const setTokens = useAuthStore((state) => state.setTokens);
+  const setTokens = useAuthStore((state) => state.login);
   const navigate = useNavigate();
 
   const handleLogin = async (
@@ -15,20 +15,15 @@ const Login = () => {
   ): Promise<void> => {
     event.preventDefault();
 
-    const form = new URLSearchParams();
-    form.append("username", identifier);
-    form.append("password", password);
-
     setError("");
 
     try {
-      const res = await publicApi.post("/auth/token", form, {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      });
+      const { accessToken, refreshToken, expiresIn } = await getTokens(
+        identifier,
+        password
+      );
 
-      setTokens(res.data.access_token, res.data.refresh_token);
+      setTokens(accessToken, refreshToken, expiresIn);
       navigate("/");
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error: unknown) {

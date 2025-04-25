@@ -3,7 +3,7 @@ import { useAuthStore } from "../auth/authStore";
 import { useEffect } from "react";
 
 const Logout = () => {
-  const clearTokens = useAuthStore((state) => state.clearTokens);
+  const clearTokens = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
 
   useEffect(() => {

@@ -18,8 +18,12 @@ const processQueue = (error: any, token: string | null = null) => {
 };
 
 export const setupAuthInterceptor = () => {
-  const { accessToken, refreshToken, setTokens, clearTokens } =
-    useAuthStore.getState();
+  const {
+    accessToken,
+    refreshToken,
+    login: setTokens,
+    logout: clearTokens,
+  } = useAuthStore.getState();
 
   privateApi.interceptors.request.use((config) => {
     if (accessToken) {
@@ -55,7 +59,8 @@ export const setupAuthInterceptor = () => {
 
           const newAccess = response.data.access_token;
           const newRefresh = response.data.refresh_token;
-          setTokens(newAccess, newRefresh);
+          const expiresIn = response.data.expires_in;
+          setTokens(newAccess, newRefresh, expiresIn);
 
           processQueue(null, newAccess);
           originalRequest.headers.Authorization = `Bearer ${newAccess}`;
