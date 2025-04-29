@@ -7,6 +7,7 @@ import NotFound from "../pages/NotFound";
 import Author from "../pages/Author";
 import Login from "../pages/Login";
 import Logout from "../pages/Logout";
+import PostSearch from "../pages/PostSearch";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="contact" element={<Contact />} />
         <Route path="login" element={<Login />} />
         <Route path="logout" element={<Logout />} />
+        <Route path="search" element={<PostSearch />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
