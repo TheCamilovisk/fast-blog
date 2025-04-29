@@ -105,7 +105,7 @@ async def get_current_user(
         payload = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
         now = datetime.now(ZoneInfo('UTC'))
-        if datetime.fromtimestamp(payload.get('exp')) < now:
+        if datetime.fromtimestamp(payload.get('exp'), ZoneInfo('UTC')) < now:
             raise HTTPException(
                 status_code=HTTPStatus.UNAUTHORIZED,
                 detail='Refresh token expired',
