@@ -1,6 +1,7 @@
 import axios from "axios";
+import { Settings } from "../config";
 
-const baseURL = import.meta.env.VITE_API_URL;
+const baseURL = Settings.API_URL;
 
 export const publicApi = axios.create({
   baseURL: baseURL,
