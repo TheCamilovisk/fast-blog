@@ -5,13 +5,13 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from api.database import table_registry
+from api.core.database import table_registry
+from api.core.settings import get_settings
 from api.models.post import Post  # noqa: F401
 from api.models.posts_tags import posts_tags  # noqa: F401
 from api.models.profile import Profile  # noqa: F401
 from api.models.tag import Tag  # noqa: F401
 from api.models.user import User  # noqa: F401
-from api.settings import get_settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
