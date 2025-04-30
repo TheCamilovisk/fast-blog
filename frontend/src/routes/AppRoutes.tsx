@@ -7,6 +7,7 @@ import Author from "../pages/Author";
 import Login from "../pages/Login";
 import Logout from "../pages/Logout";
 import PostSearch from "../pages/PostSearch";
+import About from "../pages/About";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="post/:id" element={<Post />} />
         <Route path="author/:id" element={<Author />} />
         <Route path="contact" element={<Contact />} />
+        <Route path="about" element={<About />} />
         <Route path="login" element={<Login />} />
         <Route path="logout" element={<Logout />} />
         <Route path="*" element={<NotFound />} />

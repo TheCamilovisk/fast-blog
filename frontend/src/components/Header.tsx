@@ -12,23 +12,18 @@ const Header = () => {
             <Link to="/">Home</Link>
           </li>
           <li>
-            <Link to="/post">Post</Link>
-          </li>
-          <li>
-            <Link to="/author">Author</Link>
+            <Link to="/about">About</Link>
           </li>
           <li>
             <Link to="/contact">Contact</Link>
           </li>
-          <li>
-            {isLoggedIn ? (
-              <Link to="/logout">Logout</Link>
-            ) : (
-              <Link to="/login">Login</Link>
-            )}
-          </li>
         </ul>
       </nav>
+      {isLoggedIn ? (
+        <Link to="/logout">Logout</Link>
+      ) : (
+        <Link to="/login">Login</Link>
+      )}
     </header>
   );
 };
