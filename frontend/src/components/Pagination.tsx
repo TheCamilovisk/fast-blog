@@ -1,26 +1,25 @@
+import { Link } from "react-router-dom";
+
 const Pagination = ({
   totalPages,
   limit,
   offset,
-  handleNavigation: handleNavigation,
+  handleNavigationLink: handleNavigationLink,
 }: {
   totalPages: number;
   limit: number;
   offset: number;
-  handleNavigation: (newOffset: number) => void;
+  handleNavigationLink: (newOffset: number) => string;
 }) => {
   return (
     <div>
-      {Array.from({ length: totalPages }, (_, i) => (
-        <button
-          key={i}
-          onClick={() => handleNavigation(i * limit)}
-          disabled={offset === i * limit}
-          style={{ margin: "0 0.25 rem" }}
-        >
-          {(i + 1) * limit}
-        </button>
-      ))}
+      {Array.from({ length: totalPages }, (_, i) =>
+        offset !== i * limit ? (
+          <Link to={handleNavigationLink(i * limit)}>{(i + 1) * limit}</Link>
+        ) : (
+          (i + 1) * limit
+        )
+      )}
     </div>
   );
 };
