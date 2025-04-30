@@ -1,23 +1,33 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { AuthorProps, fetchAuthor } from "../services/authorService";
 import AuthorInfo from "../components/authors/AuthorInfo";
 import { fetchPosts, PostListItem } from "../services/postService";
 import Pagination from "../components/Pagination";
 import PostList from "../components/posts/PostList";
+import { Settings } from "../config";
 
 const Author = () => {
   const { id } = useParams();
   const [author, setAuthor] = useState<AuthorProps | null>(null);
 
+  const [searchParams] = useSearchParams();
+  const offset = parseInt(searchParams.get("offset") || "0", 10);
+  const limit = parseInt(searchParams.get("limit") || "10", 10);
+
+  const handleNavigationLink = (i: number) => {
+    const url = new URL(`/author/${id}`, Settings.APP_URL);
+    url.searchParams.set("offset", i.toString());
+    url.searchParams.set("limit", limit.toString());
+
+    return url.pathname + url.search;
+  };
+
   const [posts, setPosts] = useState<PostListItem[]>([]);
-  const [offset, setOffset] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const limit = 10;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,7 +48,7 @@ const Author = () => {
     };
 
     if (id) fetchData();
-  }, [id, offset]);
+  }, [id, limit, offset]);
 
   const totalPages = Math.ceil(totalItems / limit);
 
@@ -58,7 +68,7 @@ const Author = () => {
         totalPages={totalPages}
         limit={limit}
         offset={offset}
-        handleNavigation={setOffset}
+        handleNavigationLink={handleNavigationLink}
       />
     </article>
   );
