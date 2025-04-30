@@ -2,25 +2,42 @@ import { useEffect, useState } from "react";
 import { fetchPosts, PostListItem } from "../services/postService";
 import PostList from "../components/posts/PostList";
 import Pagination from "../components/Pagination";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Settings } from "../config";
 
 const PostSearch = () => {
-  const [searchParasm] = useSearchParams();
-  const tags = searchParasm.get("tags");
+  const [searchParams] = useSearchParams();
+  const tags = searchParams.get("tags");
+  const author = searchParams.get("author");
+  const offset = parseInt(searchParams.get("offset") || "0", 10);
+  const limit = parseInt(searchParams.get("limit") || "10", 10);
+
+  const navigate = useNavigate();
+
+  const handleNavigation = (i: number) => {
+    const url = new URL("/search", Settings.APP_URL);
+    if (author) {
+      url.searchParams.set("author", author);
+    }
+    if (tags) {
+      url.searchParams.set("tags", tags);
+    }
+    url.searchParams.set("offset", i.toString());
+    url.searchParams.set("limit", limit.toString());
+
+    navigate(url.search);
+  };
 
   const [posts, setPosts] = useState<PostListItem[]>([]);
-  const [offset, setOffset] = useState<number>(0);
   const [totalItems, setTotalItems] = useState<number>(0);
 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const limit = 10;
-
   useEffect(() => {
     const loadPosts = async () => {
       try {
-        const data = await fetchPosts(offset, limit, null, tags);
+        const data = await fetchPosts(offset, limit, author, tags);
         setPosts(data.posts);
         setTotalItems(data.totalItems);
       } catch (error) {
@@ -35,7 +52,7 @@ const PostSearch = () => {
     };
 
     loadPosts();
-  }, [offset, tags]);
+  }, [offset, limit, tags, author]);
 
   if (loading) return <p>Loading posts...</p>;
   if (error) return <p>{error}</p>;
@@ -53,7 +70,7 @@ const PostSearch = () => {
         totalPages={totalPages}
         limit={limit}
         offset={offset}
-        handleSetOffset={setOffset}
+        handleNavigation={handleNavigation}
       />
     </>
   );

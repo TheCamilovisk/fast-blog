@@ -2,23 +2,23 @@ const Pagination = ({
   totalPages,
   limit,
   offset,
-  handleSetOffset,
+  handleNavigation: handleNavigation,
 }: {
   totalPages: number;
   limit: number;
   offset: number;
-  handleSetOffset: (newOffset: number) => void;
+  handleNavigation: (newOffset: number) => void;
 }) => {
   return (
     <div>
       {Array.from({ length: totalPages }, (_, i) => (
         <button
           key={i}
-          onClick={() => handleSetOffset(i * limit)}
+          onClick={() => handleNavigation(i * limit)}
           disabled={offset === i * limit}
           style={{ margin: "0 0.25 rem" }}
         >
-          {i + 1}
+          {(i + 1) * limit}
         </button>
       ))}
     </div>

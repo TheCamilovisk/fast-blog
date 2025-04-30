@@ -49,7 +49,7 @@ const Home = () => {
         totalPages={totalPages}
         limit={limit}
         offset={offset}
-        handleSetOffset={setOffset}
+        handleNavigation={setOffset}
       />
     </div>
   );
