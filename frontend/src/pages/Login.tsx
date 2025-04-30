@@ -25,9 +25,12 @@ const Login = () => {
 
       setTokens(accessToken, refreshToken, expiresIn);
       navigate("/");
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error: unknown) {
-      setError("Invalid credentials");
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Invalid credentials");
+      }
     }
   };
 
