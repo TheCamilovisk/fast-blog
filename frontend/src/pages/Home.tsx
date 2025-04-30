@@ -8,6 +8,9 @@ const Home = () => {
   const [offset, setOffset] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
 
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
   const limit = 10;
 
   useEffect(() => {
@@ -17,12 +20,22 @@ const Home = () => {
         setPosts(data.posts);
         setTotalItems(data.totalItems);
       } catch (error) {
-        console.error("Error fetching posts: ", error);
+        if (error instanceof Error) {
+          setError(error.message);
+        } else {
+          setError("Internal server error");
+        }
+      } finally {
+        setLoading(false);
       }
     };
 
     loadPosts();
   }, [offset]);
+
+  if (loading) return <p>Loading posts...</p>;
+  if (error) return <p>{error}</p>;
+  if (!posts) return <p>Posts not found</p>;
 
   const totalPages = Math.ceil(totalItems / limit);
 

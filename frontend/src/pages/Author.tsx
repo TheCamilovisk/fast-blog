@@ -29,7 +29,9 @@ const Author = () => {
         setPosts(postsData.posts);
         setTotalItems(postsData.totalItems);
       } catch (error) {
-        setError("Error fetching author data: " + error);
+        if (error instanceof Error) {
+          setError(error.message);
+        }
       } finally {
         setLoading(false);
       }
@@ -41,7 +43,7 @@ const Author = () => {
   const totalPages = Math.ceil(totalItems / limit);
 
   if (loading) return <p>Loading author...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (error) return <p>{error}</p>;
   if (!author) return <p>Author not found</p>;
 
   return (

@@ -18,7 +18,11 @@ const Post = () => {
         const postData = await fetchPostDetail(Number(id));
         setPost(postData);
       } catch (error) {
-        setError("Error fetching post data: " + error);
+        if (error instanceof Error) {
+          setError(error.message);
+        } else {
+          setError("Internal server error");
+        }
       } finally {
         setLoading(false);
       }
@@ -28,7 +32,7 @@ const Post = () => {
   }, [id]);
 
   if (loading) return <p>Loading post...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (error) return <p>{error}</p>;
   if (!post) return <p>Post not found</p>;
 
   return (

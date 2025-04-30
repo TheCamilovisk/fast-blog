@@ -5,7 +5,7 @@ import Pagination from "../components/Pagination";
 import { useSearchParams } from "react-router-dom";
 
 const PostSearch = () => {
-  const [searchParasm, setSearchParams] = useSearchParams();
+  const [searchParasm] = useSearchParams();
   const tags = searchParasm.get("tags");
 
   const [posts, setPosts] = useState<PostListItem[]>([]);
