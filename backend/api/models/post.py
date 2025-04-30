@@ -9,7 +9,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from api.database import table_registry
+from api.core.database import table_registry
 
 
 @table_registry.mapped_as_dataclass

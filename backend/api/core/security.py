@@ -10,9 +10,9 @@ from pwdlib import PasswordHash
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.database import get_session
+from api.core.database import get_session
+from api.core.settings import get_settings
 from api.models.user import User
-from api.settings import get_settings
 
 settings = get_settings()
 
@@ -115,7 +115,8 @@ async def get_current_user(
 
         if not subject_email:
             raise credentials_exception
-    except DecodeError:
+    except DecodeError as e:
+        print(e)
         raise credentials_exception
     except ExpiredSignatureError:
         raise HTTPException(

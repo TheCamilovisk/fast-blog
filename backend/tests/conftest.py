@@ -9,12 +9,12 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from testcontainers.postgres import PostgresContainer
 
 from api.app import app
-from api.database import get_session, table_registry
+from api.core.database import get_session, table_registry
+from api.core.security import create_access_token, get_password_hash
 from api.models.post import Post
 from api.models.profile import Profile
 from api.models.tag import Tag
 from api.models.user import User
-from api.security import create_access_token, get_password_hash
 
 
 @pytest_asyncio.fixture(scope='session')
@@ -150,7 +150,7 @@ async def another_profile(session, another_user, profile, mock_db_time):
 
 @pytest.fixture
 def user_token(user):
-    return create_access_token({'sub': user.email, 'exp': 30})
+    return create_access_token({'sub': user.email, 'exp': 30})[0]
 
 
 @pytest_asyncio.fixture

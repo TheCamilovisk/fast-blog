@@ -4,9 +4,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from api.database import get_session
+from api.core.database import get_session
+from api.core.schemas import SearchPatternSchema, TagsSearchResultSchema
 from api.repositories.tag_repository import TagRepository
-from api.schemas import SearchPatternSchema, TagsSearchResultSchema
 
 router = APIRouter(prefix='/tags', tags=['tags'])
 

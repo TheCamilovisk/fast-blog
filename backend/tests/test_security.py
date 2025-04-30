@@ -5,8 +5,7 @@ from fastapi import HTTPException
 from jwt import decode
 from sqlalchemy import select
 
-from api.models.user import User
-from api.security import (
+from api.core.security import (
     ALGORITHM,
     SECRET_KEY,
     create_access_token,
@@ -14,11 +13,12 @@ from api.security import (
     get_password_hash,
     verify_password,
 )
+from api.models.user import User
 
 
 def test_jwt():
     data = {'test': 'test'}
-    token = create_access_token(data)
+    token, _ = create_access_token(data)
 
     decoded = decode(
         token,

@@ -3,8 +3,8 @@ from http import HTTPStatus
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from api.core.schemas import MessageSchema
 from api.routers import auth, authors, posts, tags, users
-from api.schemas import MessageSchema
 
 app = FastAPI()
 

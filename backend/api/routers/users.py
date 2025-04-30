@@ -5,10 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.database import get_session
-from api.models.user import User
-from api.repositories.user_repository import UserRepository
-from api.schemas import (
+from api.core.database import get_session
+from api.core.schemas import (
     MessageSchema,
     UserPublicSchema,
     UserSchema,
@@ -16,7 +14,9 @@ from api.schemas import (
     UsersSearchResultSchema,
     UserUpdateSchema,
 )
-from api.security import get_current_user, get_password_hash
+from api.core.security import get_current_user, get_password_hash
+from api.models.user import User
+from api.repositories.user_repository import UserRepository
 
 router = APIRouter(prefix='/users', tags=['users'])
 

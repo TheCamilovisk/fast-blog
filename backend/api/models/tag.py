@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import DateTime, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from api.database import table_registry
+from api.core.database import table_registry
 from api.models.posts_tags import posts_tags  # noqa: F401
 
 

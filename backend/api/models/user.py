@@ -5,7 +5,7 @@ from datetime import datetime
 from sqlalchemy import Boolean, DateTime, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from api.database import table_registry
+from api.core.database import table_registry
 from api.models.profile import Profile
 from api.models.token import RefreshToken
 

@@ -7,14 +7,8 @@ from fastapi.params import Depends
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.database import get_session
-from api.models.post import Post
-from api.models.profile import Profile
-from api.models.user import User
-from api.repositories.post_repository import PostRespository
-from api.repositories.profile_repository import ProfileRepository
-from api.repositories.tag_repository import TagRepository
-from api.schemas import (
+from api.core.database import get_session
+from api.core.schemas import (
     AuthorListSchema,
     MessageSchema,
     PostCreateSchema,
@@ -24,7 +18,13 @@ from api.schemas import (
     PostUpdateSchema,
     TagCreateSchema,
 )
-from api.security import get_current_user
+from api.core.security import get_current_user
+from api.models.post import Post
+from api.models.profile import Profile
+from api.models.user import User
+from api.repositories.post_repository import PostRespository
+from api.repositories.profile_repository import ProfileRepository
+from api.repositories.tag_repository import TagRepository
 
 router = APIRouter(prefix='/posts', tags=['posts'])
 

@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import registry
 
-from api.settings import get_settings
+from api.core.settings import get_settings
 
 engine = create_async_engine(get_settings().DATABASE_URL)
 

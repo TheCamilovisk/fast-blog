@@ -1,6 +1,6 @@
 from sqlalchemy import Column, ForeignKey, Integer, Table
 
-from api.database import table_registry
+from api.core.database import table_registry
 
 posts_tags = Table(
     'posts_tags',
