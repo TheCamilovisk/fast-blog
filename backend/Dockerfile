@@ -20,7 +20,7 @@ WORKDIR /app
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 # Copy source code
-COPY . .
+COPY api migrations tests alembic.ini startup.sh ./
 RUN chmod +x startup.sh
 
 # Run FastAPI with auto-reload
