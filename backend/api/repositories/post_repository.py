@@ -27,7 +27,7 @@ class PostRespository(BaseRepository[Post]):
         title: str = None,
         tags: list[str] = [],
         author_username: str = None,
-        published_only: bool = False,
+        published_only: bool = True,
         published_at: datetime = None,
         limit: int = 10,
         offset: int = 0,
