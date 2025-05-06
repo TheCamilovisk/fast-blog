@@ -19,7 +19,7 @@ const Author = () => {
 
   const handleNavigationLink = (i: number) => {
     const url = new URL(`/author/${id}`, Settings.APP_URL);
-    url.searchParams.set("offset", i.toString());
+    url.searchParams.set("offset", (i * limit).toString());
     url.searchParams.set("limit", limit.toString());
 
     return navigate(url.pathname + url.search);
