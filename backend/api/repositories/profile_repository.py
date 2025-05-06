@@ -31,7 +31,11 @@ class ProfileRepository(BaseRepository[Profile]):
 
         total = await cls.count_query(session, query)
 
-        query = await session.scalars(query.limit(limit).offset(offset))
+        query = await session.scalars(
+            query.order_by(cls.model.created_at.desc())
+            .limit(limit)
+            .offset(offset)
+        )
         return total, query.all()
 
     @classmethod

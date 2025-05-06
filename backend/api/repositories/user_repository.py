@@ -30,7 +30,11 @@ class UserRepository(BaseRepository[User]):
 
         total = await cls.count_query(session, query)
 
-        query = await session.scalars(query.offset(offset).limit(limit))
+        query = await session.scalars(
+            query.order_by(cls.model.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
 
         return total, query.all()
 

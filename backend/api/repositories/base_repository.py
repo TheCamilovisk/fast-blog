@@ -25,7 +25,12 @@ class BaseRepository(Generic[T]):
     async def list_all(
         cls, session: AsyncSession, limit: int = 10, offset: int = 0
     ) -> Tuple[int, list[T]]:
-        query = select(cls.model).offset(offset).limit(limit)
+        query = (
+            select(cls.model)
+            .order_by(cls.model.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
 
         total = await cls.count_query(query)
 
