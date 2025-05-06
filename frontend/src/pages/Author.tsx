@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { AuthorProps, fetchAuthor } from "../services/authorService";
 import AuthorInfo from "../components/authors/AuthorInfo";
 import { fetchPosts, PostListItem } from "../services/postService";
@@ -15,12 +15,14 @@ const Author = () => {
   const offset = parseInt(searchParams.get("offset") || "0", 10);
   const limit = parseInt(searchParams.get("limit") || "10", 10);
 
+  const navigate = useNavigate();
+
   const handleNavigationLink = (i: number) => {
     const url = new URL(`/author/${id}`, Settings.APP_URL);
     url.searchParams.set("offset", i.toString());
     url.searchParams.set("limit", limit.toString());
 
-    return url.pathname + url.search;
+    return navigate(url.pathname + url.search);
   };
 
   const [posts, setPosts] = useState<PostListItem[]>([]);
@@ -68,7 +70,7 @@ const Author = () => {
         totalPages={totalPages}
         limit={limit}
         offset={offset}
-        handleNavigationLink={handleNavigationLink}
+        handlePageChange={handleNavigationLink}
       />
     </article>
   );

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { fetchPosts, PostListItem } from "../services/postService";
 import PostList from "../components/posts/PostList";
 import Pagination from "../components/Pagination";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Settings } from "../config";
 
 const PostSearch = () => {
@@ -12,7 +12,9 @@ const PostSearch = () => {
   const offset = parseInt(searchParams.get("offset") || "0", 10);
   const limit = parseInt(searchParams.get("limit") || "10", 10);
 
-  const handleNavigationLink = (i: number) => {
+  const navigate = useNavigate();
+
+  const handlePageChange = (page: number) => {
     const url = new URL("/", Settings.APP_URL);
     if (author) {
       url.searchParams.set("author", author);
@@ -20,10 +22,10 @@ const PostSearch = () => {
     if (tags) {
       url.searchParams.set("tags", tags);
     }
-    url.searchParams.set("offset", i.toString());
+    url.searchParams.set("offset", (page * limit).toString());
     url.searchParams.set("limit", limit.toString());
 
-    return url.pathname + url.search;
+    return navigate(url.pathname + url.search);
   };
 
   const [posts, setPosts] = useState<PostListItem[]>([]);
@@ -68,7 +70,7 @@ const PostSearch = () => {
         totalPages={totalPages}
         limit={limit}
         offset={offset}
-        handleNavigationLink={handleNavigationLink}
+        handlePageChange={handlePageChange}
       />
     </>
   );
