@@ -1,0 +1,93 @@
+services:
+  # ==================== Reverse Proxy (Traefik) ====================
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    command:
+      - "--api.insecure=true" # Enable Traefik dashboard (INSECURE, only for local)
+      - "--providers.docker=true" # Auto-discover Docker services
+      - "--providers.docker.exposedbydefault=false" # Only expose services explicitly
+      - "--entrypoints.web.address=:80" # HTTP only (no SSL in local)
+    ports:
+      - "80:80" # HTTP
+      - "8080:8080" # Traefik dashboard (http://localhost:8080)
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro" # Access Docker API
+    networks:
+      - blog-network
+
+  # ==================== PostgreSQL Database ====================
+  postgres:
+    image: postgres:17
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fast_blog
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -h postgres -U $$POSTGRES_USER -d $$POSTGRES_DB",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - blog-network
+    labels:
+      - "traefik.enable=false"
+
+  # ==================== FastAPI Backend ====================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/fast_blog
+      SECRET_KEY: my_secret_key
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      REFRESH_TOKEN_EXPIRE_DAYS: 7
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy # Wait for PostgreSQL to be ready
+    networks:
+      - blog-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.localhost`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+
+  # ==================== React Frontend (Vite) ====================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    environment:
+      VITE_API_URL: http://api.localhost # Points to backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # Isolate pnpm-installed dependencies
+    networks:
+      - blog-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`localhost`)" # Access at http://localhost
+      - "traefik.http.services.frontend.loadbalancer.server.port=5173"
+
+# ==================== Networks & Volumes ====================
+networks:
+  blog-network:
+    driver: bridge
+
+volumes:
+  postgres_data: # Persist PostgreSQL data
