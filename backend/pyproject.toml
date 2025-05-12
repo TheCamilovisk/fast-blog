@@ -25,6 +25,7 @@ pytest-asyncio = "^0.26.0"
 httpx = "^0.28.1"
 ruff = "^0.11.9"
 taskipy = "^1.14.1"
+pytest-cov = "^6.1.1"
 
 [build-system]
 requires = ["poetry-core"]
@@ -45,6 +46,7 @@ quote-style = 'single'
 [tool.pytest.ini_options]
 pythonpath = "."
 addopts = '-p no:warnings'
+asyncio-mode = "auto"
 
 [tool.taskipy.tasks]
 lint = 'ruff check'
