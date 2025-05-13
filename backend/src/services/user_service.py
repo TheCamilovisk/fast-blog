@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.user import User
 from src.repositories.user_repository import UserRepository
 from src.schemas.user import CreateUserRequest
-from src.utils.security import hash_password
+from src.utils.security import hash_password, verify_password
 
 
 class UserService:
@@ -22,3 +22,22 @@ class UserService:
         )
 
         return await UserRepository.create(session, user)
+
+    @staticmethod
+    async def get_by_username_or_email(
+        session: AsyncSession, identifier: str
+    ) -> User | None:
+        return await UserRepository.get_by_username_or_email(
+            session, identifier
+        )
+
+    @staticmethod
+    async def authenticate(
+        session: AsyncSession, identifier: str, password: str
+    ) -> User | None:
+        user = await UserRepository.get_by_username_or_email(
+            session, identifier
+        )
+        if user and verify_password(password, user.password):
+            return user
+        return None

@@ -9,7 +9,7 @@ from src.models.user import table_registry
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-config.set_main_option('sqlalchemy.url', get_settings().database_url)
+config.set_main_option('sqlalchemy.url', get_settings().DATABASE_URL)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

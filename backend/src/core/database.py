@@ -11,9 +11,9 @@ from src.core.settings import get_settings
 settings = get_settings()
 
 engine = create_async_engine(
-    settings.database_url,
+    settings.DATABASE_URL,
     future=True,
-    echo=False if settings.environment == 'production' else True,
+    echo=False if settings.ENVIRONMENT == 'production' else True,
 )
 AsyncSessionLocal = async_sessionmaker(
     bind=engine, expire_on_commit=False, class_=AsyncSession
