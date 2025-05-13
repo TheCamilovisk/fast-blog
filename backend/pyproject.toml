@@ -15,8 +15,10 @@ pydantic = "^2.11.4"
 sqlalchemy = "^2.0.40"
 alembic = "^1.15.2"
 python-jose = { extras = ["cryptography"], version = "^3.4.0" }
-passlib = { extras = ["bcrypt"], version = "^1.7.4" }
-psycopg2-binary = "^2.9.10"
+passlib = { extras = ["argon"], version = "^1.7.4" }
+pydantic-settings = "^2.9.1"
+psycopg = { extras = ["binary"], version = "^3.2.8" }
+argon2-cffi = "^23.1.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -26,6 +28,7 @@ httpx = "^0.28.1"
 ruff = "^0.11.9"
 taskipy = "^1.14.1"
 pytest-cov = "^6.1.1"
+testcontainers = "^4.10.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -37,7 +40,7 @@ extend-exclude = ['migrations']
 
 [tool.ruff.lint]
 preview = true
-select = ['I', 'F', 'E', 'W', 'PL', 'PT']
+select = ['I', 'F', 'E', 'W', 'PL', 'PT', 'FAST']
 
 [tool.ruff.format]
 preview = true
@@ -46,7 +49,7 @@ quote-style = 'single'
 [tool.pytest.ini_options]
 pythonpath = "."
 addopts = '-p no:warnings'
-asyncio-mode = "auto"
+asyncio_default_fixture_loop_scope = 'function'
 
 [tool.taskipy.tasks]
 lint = 'ruff check'
@@ -56,3 +59,6 @@ run = 'fastapi dev src/main.py'
 pre_test = 'task lint'
 test = 'pytest -s -x --cov=src -vv'
 post_test = 'coverage html'
+
+[tool.coverage.run]
+concurrency = ['thread', 'greenlet']

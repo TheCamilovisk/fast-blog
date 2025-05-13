@@ -1,18 +1,49 @@
 from typing import AsyncGenerator
 
+import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from testcontainers.postgres import PostgresContainer
 
+from src.core.database import get_session
 from src.main import app
+from src.models.user import table_registry
+
+
+@pytest.fixture(scope='session')
+def engine():
+    with PostgresContainer('postgres:17', driver='psycopg') as postgres:
+        _engine = create_async_engine(postgres.get_connection_url())
+        yield _engine
 
 
 @pytest_asyncio.fixture
-async def async_client() -> AsyncGenerator[AsyncClient, None]:
+async def session(engine):
+    async with engine.begin() as conn:
+        await conn.run_sync(table_registry.metadata.create_all)
+
+    async with AsyncSession(engine, expire_on_commit=False) as session:
+        yield session
+
+    async with engine.begin() as conn:
+        await conn.run_sync(table_registry.metadata.drop_all)
+
+
+@pytest_asyncio.fixture
+async def async_client(session) -> AsyncGenerator[AsyncClient, None]:
     """
     Fixture that provides a TestClient for the FastAPI app.
     """
+
+    def get_session_override():
+        return session
+
     transport = ASGITransport(app)
     async with AsyncClient(
         transport=transport, base_url='http://test'
     ) as client:
+        app.dependency_overrides[get_session] = get_session_override
         yield client
+
+    app.dependency_overrides.clear()
