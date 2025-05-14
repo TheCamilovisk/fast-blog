@@ -3,10 +3,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.database import get_session
-from src.core.settings import get_settings
+from src.core.dependencies import DBSession
 from src.schemas.token import RefreshTokenRequestSchema, TokenSchema
 from src.services.user_service import UserService
 from src.utils.security import (
@@ -17,10 +15,8 @@ from src.utils.security import (
 )
 
 router = APIRouter(prefix='/auth', tags=['auth'])
-settings = get_settings()
 
 OAuth2Form = Annotated[OAuth2PasswordRequestForm, Depends()]
-DBSession = Annotated[AsyncSession, Depends(get_session)]
 
 
 @router.post('/token', status_code=HTTPStatus.CREATED)

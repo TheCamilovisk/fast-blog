@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from typing import Annotated
 
-from fastapi import HTTPException
+from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,7 +11,7 @@ from src.services.user_service import UserService
 from src.utils.security import JWTTokenType, decode_token
 
 OAuth2Scheme = Annotated[str, OAuth2PasswordBearer(tokenUrl='/auth/token')]
-DBSession = Annotated[AsyncSession, get_session]
+DBSession = Annotated[AsyncSession, Depends(get_session)]
 
 
 async def get_current_user(token: OAuth2Scheme, session: DBSession) -> User:

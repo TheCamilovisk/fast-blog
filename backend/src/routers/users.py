@@ -1,16 +1,12 @@
 from http import HTTPStatus
-from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, HTTPException
 
-from src.core.database import get_session
+from src.core.dependencies import DBSession
 from src.schemas.user import CreateUserRequest, UserResponse
 from src.services.user_service import UserService
 
 router = APIRouter(prefix='/users', tags=['users'])
-
-DBSession = Annotated[AsyncSession, Depends(get_session)]
 
 
 @router.post('/', status_code=HTTPStatus.CREATED)
