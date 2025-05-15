@@ -115,9 +115,7 @@ async def test_unauthorized_create(async_client):
 
 
 @pytest.mark.asyncio
-async def test_publish_and_unpublish_by_author(
-    async_client, user, token, post
-):
+async def test_publish_and_unpublish_by_author(async_client, token, post):
     auth_header = {'Authorization': f'Bearer {token}'}
     resp_pub = await async_client.post(
         f'/posts/{post.id}/publish', headers=auth_header
@@ -135,3 +133,25 @@ async def test_publish_and_unpublish_by_author(
     body = resp_unpub.json()
     assert body['is_published'] is False
     assert body['published_at'] is None
+
+
+@pytest.mark.asyncio
+async def test_publish_and_unpublish_forbidden_for_other_user(
+    async_client, token, another_token, post, another_post
+):
+    await async_client.post(
+        f'/posts/{post.id}/publish',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    invalid_auth_payload = {'Authorization': f'Bearer {another_token}'}
+
+    respo_fobidden_pub = await async_client.post(
+        f'/posts/{another_post.id}/publish', headers=invalid_auth_payload
+    )
+    assert respo_fobidden_pub.status_code == HTTPStatus.UNAUTHORIZED
+
+    respo_fobidden_unpub = await async_client.post(
+        f'/posts/{post.id}/unpublish', headers=invalid_auth_payload
+    )
+    assert respo_fobidden_unpub.status_code == HTTPStatus.UNAUTHORIZED

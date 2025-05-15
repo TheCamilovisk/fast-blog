@@ -68,6 +68,21 @@ async def user(session) -> User:
 
 
 @pytest_asyncio.fixture
+async def another_user(session) -> User:
+    password = 'S3cr3|!'
+    user = User.create(
+        username='faust',
+        email='faust@example.com',
+        password=password,
+    )
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
+    user.clean_password = password
+    return user
+
+
+@pytest_asyncio.fixture
 async def token(user) -> str:
     payload = {'sub': user.username}
     access_token = create_access_token(payload)
@@ -75,11 +90,33 @@ async def token(user) -> str:
 
 
 @pytest_asyncio.fixture
+async def another_token(another_user) -> str:
+    payload = {'sub': another_user.username}
+    access_token = create_access_token(payload)
+    return access_token
+
+
+@pytest_asyncio.fixture
 async def post(session, user):
     payload = {
-        'title': 'Test Post',
-        'subtitle': 'Test',
-        'content': 'The content',
+        'title': 'Test Post 1',
+        'subtitle': 'Test 1',
+        'content': 'The content 1',
+    }
+    post = await PostService.create_post(
+        session=session,
+        post_data=CreatePostRequestSchema(**payload),
+        author=user,
+    )
+    return post
+
+
+@pytest_asyncio.fixture
+async def another_post(session, user):
+    payload = {
+        'title': 'Test Post 2',
+        'subtitle': 'Test 2',
+        'content': 'The content 2',
     }
     post = await PostService.create_post(
         session=session,
