@@ -46,3 +46,33 @@ async def get_post(post_id: int, session: DBSession):
             status_code=HTTPStatus.NOT_FOUND, detail='Post not found'
         )
     return post
+
+
+@router.post('/{post_id}/publish', status_code=HTTPStatus.OK)
+async def publish_post(
+    post_id: int, session: DBSession, current_user: CurrentUser
+) -> PostResponseSchema:
+    try:
+        post = await PostService.publish_post(
+            session=session, post_id=post_id, current_user=current_user
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail=str(e))
+    return post
+
+
+@router.post('/{post_id}/unpublish', status_code=HTTPStatus.OK)
+async def unpublish_post(
+    post_id: int, session: DBSession, current_user: CurrentUser
+) -> PostResponseSchema:
+    try:
+        post = await PostService.unpublish_post(
+            session=session, post_id=post_id, current_user=current_user
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail=str(e))
+    return post

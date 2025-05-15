@@ -9,6 +9,8 @@ from testcontainers.postgres import PostgresContainer
 from src.core.database import get_session
 from src.main import app
 from src.models.user import User, table_registry
+from src.schemas.posts import CreatePostRequestSchema
+from src.services.post_service import PostService
 from src.utils.security import create_access_token
 
 
@@ -70,3 +72,18 @@ async def token(user) -> str:
     payload = {'sub': user.username}
     access_token = create_access_token(payload)
     return access_token
+
+
+@pytest_asyncio.fixture
+async def post(session, user):
+    payload = {
+        'title': 'Test Post',
+        'subtitle': 'Test',
+        'content': 'The content',
+    }
+    post = await PostService.create_post(
+        session=session,
+        post_data=CreatePostRequestSchema(**payload),
+        author=user,
+    )
+    return post

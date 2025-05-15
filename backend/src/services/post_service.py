@@ -44,7 +44,9 @@ class PostService:
             raise ValueError('Post not found')
 
         if post.author_id != current_user.id:
-            raise PermissionError('Not allowed')
+            raise PermissionError(
+                'User does not have permission to publish this post'
+            )
 
         if post.is_published:
             return post
@@ -63,7 +65,9 @@ class PostService:
             raise ValueError('Post not found')
 
         if post.author_id != current_user.id:
-            raise PermissionError('Not allowed')
+            raise PermissionError(
+                'User does not have permission to unpublish this post'
+            )
 
         if not post.is_published:
             return post

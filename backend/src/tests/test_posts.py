@@ -64,7 +64,7 @@ async def test_list_posts_pagination(async_client, user, token, session):
 
 
 @pytest.mark.asyncio
-async def test_post_variants(async_client, user, token, session):
+async def test_post_variants(async_client, user, session):
     pub_payload = {
         'title': 'Published',
         'subtitle': 'Yes',
@@ -112,3 +112,26 @@ async def test_unauthorized_create(async_client):
     resp = await async_client.post('/posts/', json=payload)
     assert resp.status_code == HTTPStatus.UNAUTHORIZED
     assert resp.json()['detail'] == 'Not authenticated'
+
+
+@pytest.mark.asyncio
+async def test_publish_and_unpublish_by_author(
+    async_client, user, token, post
+):
+    auth_header = {'Authorization': f'Bearer {token}'}
+    resp_pub = await async_client.post(
+        f'/posts/{post.id}/publish', headers=auth_header
+    )
+    print(resp_pub.json())
+    assert resp_pub.status_code == HTTPStatus.OK
+    body = resp_pub.json()
+    assert body['is_published'] is True
+    assert body['published_at'] is not None
+
+    resp_unpub = await async_client.post(
+        f'/posts/{post.id}/unpublish', headers=auth_header
+    )
+    assert resp_unpub.status_code == HTTPStatus.OK
+    body = resp_unpub.json()
+    assert body['is_published'] is False
+    assert body['published_at'] is None
