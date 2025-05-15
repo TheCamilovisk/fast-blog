@@ -1,16 +1,19 @@
 from http import HTTPStatus
 from typing import Annotated
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Query
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import get_session
 from src.models.user import User
+from src.schemas.pagination import PaginationSchema
 from src.services.user_service import UserService
 from src.utils.security import JWTTokenType, decode_token
 
-OAuth2Scheme = Annotated[str, OAuth2PasswordBearer(tokenUrl='/auth/token')]
+OAuth2Scheme = Annotated[
+    str, Depends(OAuth2PasswordBearer(tokenUrl='/auth/token'))
+]
 DBSession = Annotated[AsyncSession, Depends(get_session)]
 
 
@@ -30,3 +33,8 @@ async def get_current_user(token: OAuth2Scheme, session: DBSession) -> User:
     if not user:
         invalid_credentials_exception
     return user
+
+
+CurrentUser = Annotated[User, Depends(get_current_user)]
+
+PageFilter = Annotated[PaginationSchema, Query()]

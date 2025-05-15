@@ -25,7 +25,10 @@ class UserRepository:
         return result.first()
 
     @staticmethod
-    async def create(session: AsyncSession, user: User) -> User:
+    async def create(
+        session: AsyncSession, username: str, email: str, password: str
+    ) -> User:
+        user = User.create(username=username, email=email, password=password)
         session.add(user)
         await session.commit()
         await session.refresh(user)

@@ -17,6 +17,7 @@ async def test_create_user_success(async_client):
     assert body['username'] == 'alice'
     assert body['email'] == 'alice@example.com'
     assert body['is_active']
+    assert body['posts'] == []
     assert not body['is_superuser']
 
 

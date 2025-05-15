@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 from fastapi import FastAPI
 
-from src.routers import auth, users
+from src.routers import auth, posts, users
 from src.schemas.message import MessageSchema
 
 app = FastAPI()
@@ -15,3 +15,4 @@ async def get_root():
 
 app.include_router(users.router)
 app.include_router(auth.router)
+app.include_router(posts.router)

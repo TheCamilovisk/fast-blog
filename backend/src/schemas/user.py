@@ -1,7 +1,9 @@
 from pydantic import BaseModel, EmailStr, Field
 
+from src.schemas.posts import PostResponseSchema
 
-class CreateUserRequest(BaseModel):
+
+class CreateUserRequestSchema(BaseModel):
     username: str = Field(
         ..., min_length=3, max_length=50, examples=['johndoe']
     )
@@ -14,12 +16,13 @@ class CreateUserRequest(BaseModel):
     )
 
 
-class UserResponse(BaseModel):
+class UserResponseSchema(BaseModel):
     id: int
     username: str
     email: EmailStr
     is_active: bool
     is_superuser: bool
+    posts: list[PostResponseSchema] = []
 
     class Config:
         from_attributes = True

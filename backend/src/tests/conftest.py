@@ -9,7 +9,7 @@ from testcontainers.postgres import PostgresContainer
 from src.core.database import get_session
 from src.main import app
 from src.models.user import User, table_registry
-from src.utils.security import hash_password
+from src.utils.security import create_access_token
 
 
 @pytest.fixture(scope='session')
@@ -53,13 +53,20 @@ async def async_client(session) -> AsyncGenerator[AsyncClient, None]:
 @pytest_asyncio.fixture
 async def user(session) -> User:
     password = 'S3cur3!'
-    user = User(
+    user = User.create(
         username='dave',
         email='dave@example.com',
-        password=hash_password(password),
+        password=password,
     )
     session.add(user)
     await session.commit()
     await session.refresh(user)
     user.clean_password = password
     return user
+
+
+@pytest_asyncio.fixture
+async def token(user) -> str:
+    payload = {'sub': user.username}
+    access_token = create_access_token(payload)
+    return access_token
