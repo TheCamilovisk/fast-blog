@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from typing import List
 from uuid import uuid4
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
@@ -40,6 +41,15 @@ class Post(TimestampMixin):
     is_published: Mapped[bool] = mapped_column(Boolean, default=False)
     published_at: Mapped[datetime | None] = mapped_column(
         DateTime, nullable=True, default=None
+    )
+
+    comments: Mapped[List['Comment']] = relationship(  # noqa: F821 # type: ignore
+        'Comment',
+        back_populates='post',
+        uselist=True,
+        init=False,
+        default=[],
+        lazy='selectin',
     )
 
     @classmethod

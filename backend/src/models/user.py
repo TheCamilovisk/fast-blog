@@ -36,6 +36,15 @@ class User(TimestampMixin):
         lazy='selectin',
     )
 
+    comments: Mapped[List['Comment']] = relationship(  # noqa: F821 # type: ignore
+        'Comment',
+        back_populates='author',
+        uselist=True,
+        init=False,
+        default=[],
+        lazy='selectin',
+    )
+
     @classmethod
     def create(cls, username: str, email: str, password: str) -> User:
         return cls(

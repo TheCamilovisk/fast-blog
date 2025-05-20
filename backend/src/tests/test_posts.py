@@ -120,7 +120,6 @@ async def test_publish_and_unpublish_by_author(async_client, token, post):
     resp_pub = await async_client.post(
         f'/posts/{post.id}/publish', headers=auth_header
     )
-    print(resp_pub.json())
     assert resp_pub.status_code == HTTPStatus.OK
     body = resp_pub.json()
     assert body['is_published'] is True
