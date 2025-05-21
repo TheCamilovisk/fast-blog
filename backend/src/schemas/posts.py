@@ -13,6 +13,14 @@ class CreatePostRequestSchema(BaseModel):
     )
 
 
+class UpdatePostRequestSchema(BaseModel):
+    title: str | None = Field(None, examples=['My first post'])
+    subtitle: str | None = Field(None, examples=['An intro to blogging'])
+    content: str | None = Field(
+        None, examples=['This is the full content of the post']
+    )
+
+
 class PostResponseSchema(BaseModel):
     id: int
     title: str

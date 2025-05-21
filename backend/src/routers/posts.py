@@ -7,6 +7,7 @@ from src.schemas.posts import (
     CreatePostRequestSchema,
     PostListResponseSchema,
     PostResponseSchema,
+    UpdatePostRequestSchema,
 )
 from src.services.post_service import PostService
 
@@ -46,6 +47,41 @@ async def get_post(post_id: int, session: DBSession):
             status_code=HTTPStatus.NOT_FOUND, detail='Post not found'
         )
     return post
+
+
+@router.put('/{post_id}', status_code=HTTPStatus.OK)
+async def update_post(
+    post_id: int,
+    post_data: UpdatePostRequestSchema,
+    session: DBSession,
+    current_user: CurrentUser,
+) -> PostResponseSchema:
+    try:
+        post = await PostService.update_post(
+            session=session,
+            post_id=post_id,
+            post_data=post_data,
+            current_user=current_user,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail=str(e))
+    return post
+
+
+@router.delete('/{post_id}', status_code=HTTPStatus.NO_CONTENT)
+async def delete_post(
+    post_id: int, session: DBSession, current_user: CurrentUser
+) -> None:
+    try:
+        await PostService.delete_post(
+            session=session, post_id=post_id, current_user=current_user
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail=str(e))
 
 
 @router.post('/{post_id}/publish', status_code=HTTPStatus.OK)

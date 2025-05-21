@@ -65,6 +65,20 @@ class Post(TimestampMixin):
             author_id=author_id,
         )
 
+    def update(
+        self,
+        title: str | None = None,
+        subtitle: str | None = None,
+        content: str | None = None,
+    ) -> None:
+        if self.title != title:
+            self.title = title
+            self.slug = _slugfy(title=title)
+        if subtitle:
+            self.subtitle = subtitle
+        if content:
+            self.content = content
+
     def publish(self):
         if self.is_published:
             return

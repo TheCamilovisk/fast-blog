@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.post import Post
 from src.models.user import User
 from src.repositories.post_repository import PostRepository
-from src.schemas.posts import CreatePostRequestSchema
+from src.schemas.posts import CreatePostRequestSchema, UpdatePostRequestSchema
 
 
 class PostService:
@@ -25,6 +25,37 @@ class PostService:
     @staticmethod
     async def get_post(session: AsyncSession, post_id: int) -> Post | None:
         return await PostRepository.get_by_id(session=session, post_id=post_id)
+
+    @staticmethod
+    async def update_post(
+        session: AsyncSession,
+        post_id: int,
+        post_data: UpdatePostRequestSchema,
+        current_user: User,
+    ) -> Post:
+        post = await PostRepository.get_by_id(session=session, post_id=post_id)
+        if not post:
+            raise ValueError('Post not found')
+        if post.author_id != current_user.id:
+            raise PermissionError('Not allowed')
+        post.update(
+            title=post_data.title,
+            subtitle=post_data.subtitle,
+            content=post_data.content,
+        )
+        post = await PostRepository.save(session=session, post=post)
+        return post
+
+    @staticmethod
+    async def delete_post(
+        session: AsyncSession, post_id: int, current_user: User
+    ) -> None:
+        post = await PostRepository.get_by_id(session=session, post_id=post_id)
+        if not post:
+            raise ValueError('Post not found')
+        if post.author_id != current_user.id:
+            raise PermissionError('Not allowed')
+        await PostRepository.delete(session=session, post=post)
 
     @staticmethod
     async def list_published(

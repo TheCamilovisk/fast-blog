@@ -49,3 +49,8 @@ class PostRepository:
         await session.commit()
         await session.refresh(post)
         return post
+
+    @staticmethod
+    async def delete(session: AsyncSession, post: Post) -> None:
+        await session.delete(post)
+        await session.commit()

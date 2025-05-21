@@ -31,6 +31,85 @@ async def test_create_post_success(async_client, user, token):
 
 
 @pytest.mark.asyncio
+async def test_update_post_success(async_client, token, post):
+    payload = {
+        'title': 'New title',
+        'subtitle': 'New sub',
+        'content': 'New content',
+    }
+    resp = await async_client.put(
+        f'/posts/{post.id}',
+        json=payload,
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    assert resp.status_code == HTTPStatus.OK
+    body = resp.json()
+    assert body['title'] == payload['title']
+    assert body['subtitle'] == payload['subtitle']
+    assert body['content'] == payload['content']
+    assert body['slug'].startswith('new-title')
+
+
+@pytest.mark.asyncio
+async def test_update_post_forbidden(async_client, another_token, post):
+    payload = {
+        'title': 'New title',
+        'subtitle': 'New sub',
+        'content': 'New content',
+    }
+    resp = await async_client.put(
+        f'/posts/{post.id}',
+        json=payload,
+        headers={'Authorization': f'Bearer {another_token}'},
+    )
+    assert resp.status_code == HTTPStatus.UNAUTHORIZED
+
+
+@pytest.mark.asyncio
+async def test_update_post_not_found(async_client, token):
+    payload = {
+        'title': 'New title',
+        'subtitle': 'New sub',
+        'content': 'New content',
+    }
+    resp = await async_client.put(
+        '/posts/999',
+        json=payload,
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    assert resp.status_code == HTTPStatus.NOT_FOUND
+
+
+@pytest.mark.asyncio
+async def test_delete_post_success(async_client, token, post):
+    post_id = post.id
+    resp = await async_client.delete(
+        f'/posts/{post_id}', headers={'Authorization': f'Bearer {token}'}
+    )
+    assert resp.status_code == HTTPStatus.NO_CONTENT
+
+    resp = await async_client.get(f'/posts/{post_id}')
+    assert resp.status_code == HTTPStatus.NOT_FOUND
+
+
+@pytest.mark.asyncio
+async def test_delete_post_forbidden(async_client, another_token, post):
+    resp = await async_client.delete(
+        f'/posts/{post.id}',
+        headers={'Authorization': f'Bearer {another_token}'},
+    )
+    assert resp.status_code == HTTPStatus.UNAUTHORIZED
+
+
+@pytest.mark.asyncio
+async def test_delete_post_not_found(async_client, token):
+    resp = await async_client.delete(
+        '/posts/999', headers={'Authorization': f'Bearer {token}'}
+    )
+    assert resp.status_code == HTTPStatus.NOT_FOUND
+
+
+@pytest.mark.asyncio
 async def test_list_posts_empty(async_client):
     resp = await async_client.get('/posts/')
     assert resp.status_code == HTTPStatus.OK

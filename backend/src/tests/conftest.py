@@ -68,7 +68,7 @@ async def user(session) -> User:
 
 
 @pytest_asyncio.fixture
-async def another_user(session) -> User:
+async def another_user(session, user) -> User:
     password = 'S3cr3|!'
     user = User.create(
         username='faust',
