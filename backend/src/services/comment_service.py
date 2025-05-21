@@ -3,7 +3,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.comment import Comment
 from src.models.user import User
 from src.repositories.comment_repository import CommentRepository
-from src.schemas.comment import CreateCommentRequestSchema
+from src.schemas.comment import (
+    CreateCommentRequestSchema,
+    UpdateCommentRequestSchema,
+)
 
 
 class CommentService:
@@ -38,3 +41,36 @@ class CommentService:
             session=session, post_id=post_id, offset=offset, limit=limit
         )
         return comments
+
+    @staticmethod
+    async def delete_comment(
+        session: AsyncSession, comment_id: int, current_user: User
+    ) -> None:
+        comment = await CommentRepository.get_by_id(
+            session=session, id=comment_id
+        )
+        if not comment:
+            raise ValueError('Comment not found')
+        if comment.author_id != current_user.id:
+            raise PermissionError('Not allowed')
+        await CommentRepository.delete(session=session, comment=comment)
+
+    @staticmethod
+    async def update_comment(
+        session: AsyncSession,
+        comment_id: int,
+        comment_data: UpdateCommentRequestSchema,
+        current_user: User,
+    ) -> Comment:
+        comment = await CommentRepository.get_by_id(
+            session=session, id=comment_id
+        )
+        if not comment:
+            raise ValueError('Comment not found')
+        if comment.author_id != current_user.id:
+            raise PermissionError('Not allowed')
+        comment.update(comment_data.content)
+        comment = await CommentRepository.save(
+            session=session, comment=comment
+        )
+        return comment

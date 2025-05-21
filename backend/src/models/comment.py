@@ -56,10 +56,13 @@ class Comment(TimestampMixin):
         post_id: int,
         author_id: int,
         parent: Comment | None = None,
-    ):
+    ) -> Comment:
         return cls(
             content=content,
             post_id=post_id,
             author_id=author_id,
             parent=parent,
         )
+
+    def update(self, content: str) -> None:
+        self.content = content

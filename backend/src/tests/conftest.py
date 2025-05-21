@@ -9,7 +9,9 @@ from testcontainers.postgres import PostgresContainer
 from src.core.database import get_session
 from src.main import app
 from src.models.user import User, table_registry
+from src.schemas.comment import CreateCommentRequestSchema
 from src.schemas.posts import CreatePostRequestSchema
+from src.services.comment_service import CommentService
 from src.services.post_service import PostService
 from src.utils.security import create_access_token
 
@@ -124,3 +126,14 @@ async def another_post(session, user):
         author=user,
     )
     return post
+
+
+@pytest_asyncio.fixture
+async def comment(session, user, post):
+    payload = {'post_id': post.id, 'content': 'Content'}
+    comment = await CommentService.add_comment(
+        session=session,
+        comment_data=CreateCommentRequestSchema(**payload),
+        current_user=user,
+    )
+    return comment

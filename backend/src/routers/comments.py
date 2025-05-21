@@ -7,6 +7,7 @@ from src.schemas.comment import (
     CommentListResponseSchema,
     CommentResponseSchema,
     CreateCommentRequestSchema,
+    UpdateCommentRequestSchema,
 )
 from src.services.comment_service import CommentService
 
@@ -41,3 +42,38 @@ async def list_comments(
         limit=filter.limit,
     )
     return {'pagination': filter, 'comments': comments}
+
+
+@router.delete('/{comment_id}', status_code=HTTPStatus.NO_CONTENT)
+async def delete_comment(
+    comment_id: int, session: DBSession, current_user: CurrentUser
+) -> None:
+    try:
+        await CommentService.delete_comment(
+            session=session, comment_id=comment_id, current_user=current_user
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail=str(e))
+
+
+@router.put('/{comment_id}', status_code=HTTPStatus.OK)
+async def update_comment(
+    comment_id: int,
+    comment_data: UpdateCommentRequestSchema,
+    session: DBSession,
+    current_user: CurrentUser,
+) -> CommentResponseSchema:
+    try:
+        comment = await CommentService.update_comment(
+            session=session,
+            comment_id=comment_id,
+            comment_data=comment_data,
+            current_user=current_user,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail=str(e))
+    return comment

@@ -43,3 +43,15 @@ class CommentRepository:
         query = select(Comment).filter_by(id=id)
         result = await session.scalar(query)
         return result
+
+    @staticmethod
+    async def delete(session: AsyncSession, comment: Comment) -> None:
+        await session.delete(comment)
+        await session.commit()
+
+    @staticmethod
+    async def save(session: AsyncSession, comment: Comment) -> Comment:
+        session.add(comment)
+        await session.commit()
+        await session.refresh(comment)
+        return comment

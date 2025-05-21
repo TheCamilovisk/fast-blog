@@ -115,3 +115,57 @@ async def test_list_comments_default_pagination(
     assert resp.status_code == HTTPStatus.OK
     comments = resp.json()['comments']
     assert len(comments) == 10  # noqa: PLR2004
+
+
+@pytest.mark.asyncio
+async def test_delete_comment_success(async_client, token, comment):
+    resp = await async_client.delete(
+        f'/comments/{comment.id}', headers={'Authorization': f'Bearer {token}'}
+    )
+    assert resp.status_code == HTTPStatus.NO_CONTENT
+
+
+@pytest.mark.asyncio
+async def test_delete_comment_forbidden(async_client, another_token, comment):
+    resp = await async_client.delete(f'/comments/{comment.id}')
+    assert resp.status_code == HTTPStatus.UNAUTHORIZED
+
+    resp = await async_client.delete(
+        f'/comments/{comment.id}',
+        headers={'Authorization': f'Bearer {another_token}'},
+    )
+    assert resp.status_code == HTTPStatus.UNAUTHORIZED
+
+
+@pytest.mark.asyncio
+async def test_update_comment_success(async_client, token, comment):
+    payload = {'content': 'Edited'}
+    resp = await async_client.put(
+        f'/comments/{comment.id}',
+        json=payload,
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    assert resp.status_code == HTTPStatus.OK
+    assert resp.json()['content'] == payload['content']
+
+
+@pytest.mark.asyncio
+async def test_update_comment_forbidden(async_client, another_token, comment):
+    payload = {'content': 'Edited'}
+    resp = await async_client.put(
+        f'/comments/{comment.id}',
+        json=payload,
+        headers={'Authorization': f'Bearer {another_token}'},
+    )
+    assert resp.status_code == HTTPStatus.UNAUTHORIZED
+
+
+@pytest.mark.asyncio
+async def test_update_comment_not_found(async_client, token):
+    payload = {'content': 'Edited'}
+    resp = await async_client.put(
+        '/comments/999',
+        json=payload,
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    assert resp.status_code == HTTPStatus.NOT_FOUND

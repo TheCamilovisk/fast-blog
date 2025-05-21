@@ -11,6 +11,10 @@ class CreateCommentRequestSchema(BaseModel):
     parent_id: int | None = Field(None, examples=[5])
 
 
+class UpdateCommentRequestSchema(BaseModel):
+    content: str | None = Field(None, examples=['Create post!'])
+
+
 class CommentResponseSchema(BaseModel):
     id: int
     content: str
