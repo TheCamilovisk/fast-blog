@@ -76,6 +76,26 @@ async def test_add_reply_and_list(async_client, user, token, post, session):
 
 
 @pytest.mark.asyncio
+async def test_unauthenticated_cannot_comment(async_client, post):
+    resp = await async_client.post(
+        '/comments/', json={'post_id': post.id, 'content': 'No auth'}
+    )
+    assert resp.status_code == HTTPStatus.UNAUTHORIZED
+    assert resp.json()['detail'] == 'Not authenticated'
+
+
+@pytest.mark.asyncio
+async def test_comment_nonexistent_post_returns_400(async_client, user, token):
+    resp = await async_client.post(
+        '/comments/',
+        json={'post_id': 999, 'content': 'Should fail'},
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert resp.status_code == HTTPStatus.BAD_REQUEST
+
+
+@pytest.mark.asyncio
 async def test_list_comments_default_pagination(
     async_client, session, user, post
 ):
